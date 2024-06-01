@@ -11,6 +11,6 @@ COPY . /app/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-CMD gunicorn bankid_authentication.wsgi:application --bind 0.0.0.0:"${PORT}" --workers 3 --timeout 120
+CMD gunicorn project.wsgi:application --bind 0.0.0.0:"${PORT}" --workers 3 --timeout 120
 
 EXPOSE ${PORT}
