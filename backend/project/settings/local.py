@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from project.settings import get_secret
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -20,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-e)&64cx*2ytzmk1vz!17vw1xxrmt%ghkg-s_efa5ay^2ral4i+'
+SECRET_KEY = get_secret('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -74,10 +75,20 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+DB_NAME = get_secret("POSTGRES_NAME")
+DB_USER = get_secret("POSTGRES_USER")
+DB_PASSWORD = get_secret("POSTGRES_PASSWORD")
+DB_ADDRESS = get_secret("POSTGRES_ADDRESS")
+DB_PORT = get_secret("POSTGRES_PORT")
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        "PASSWORD": DB_PASSWORD,
+        "HOST": DB_ADDRESS,
+        "PORT": DB_PORT,
     }
 }
 

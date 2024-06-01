@@ -74,19 +74,19 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DB_NAME = get_secret("DB_NAME")
-DB_USER_NM = get_secret("DB_USER_NM")
-DB_USER_PW = get_secret("DB_USER_PW")
-DB_IP = get_secret("DB_IP")
-DB_PORT = get_secret("DB_PORT")
+DB_NAME = get_secret("POSTGRES_NAME")
+DB_USER = get_secret("POSTGRES_USER")
+DB_PASSWORD = get_secret("POSTGRES_PASSWORD")
+DB_ADDRESS = get_secret("POSTGRES_ADDRESS")
+DB_PORT = get_secret("POSTGRES_PORT")
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': DB_NAME,
-        'USER': DB_USER_NM,
-        "PASSWORD": DB_USER_PW,
-        "HOST": DB_IP,
+        'USER': DB_USER,
+        "PASSWORD": DB_PASSWORD,
+        "HOST": DB_ADDRESS,
         "PORT": DB_PORT,
     }
 }
