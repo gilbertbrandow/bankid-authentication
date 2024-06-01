@@ -6,16 +6,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      POSTGRES_DB: your_db_name
-      POSTGRES_USER: your_db_user
-      POSTGRES_PASSWORD: your_db_password
+      POSTGRES_DB: ${POSTGRES_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U your_db_user -d your_db_name"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
   backend:
     build:
       context: ./backend
@@ -28,21 +29,23 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      - DATABASE_URL=postgres://your_db_user:your_db_password@db:5432/your_db_name
-      - PIPELINE=local
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_NAME}
+      PIPELINE: ${PIPELINE}
 
-  #frontend:
-    #build:
-      #context: ./frontend
-      #dockerfile: Dockerfile
-    #volumes:
-      #- ./frontend:/app
-    #ports:
-      #- "3000:3000"
-    #environment:
-      #- REACT_APP_BACKEND_URL=http://localhost:8000
+# Commented out frontend service
+# frontend:
+#   build:
+#     context: ./frontend
+#     dockerfile: Dockerfile
+#   volumes:
+#     - ./frontend:/app
+#   ports:
+#     - "3000:3000"
+#   environment:
+#     REACT_APP_BACKEND_URL: http://localhost:8000
 
 volumes:
   postgres_data:
