@@ -1,17 +1,26 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group
-    
+from django.contrib.auth.models import AbstractBaseUser, Group as BaseGroup, BaseUserManager, PermissionsMixin, Group
+
+
 class AccountManager():
     def create_user(self, **extra_fields) -> 'Account':
         Account = self.model(**extra_fields)
         return Account
+
 class Account(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = AccountManager()
-    
+
     REQUIRED_FIELDS = []
+    
+    class Meta:
+        db_table = 'accounts'
+        verbose_name = 'account'
+        verbose_name_plural = 'account'
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email: str, password: str = None, **extra_fields) -> 'User':
         if not email:
@@ -25,6 +34,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email: str, password: str = None, **extra_fields) -> 'User':
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -41,6 +51,20 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+    class Meta:
+        db_table = 'users'
+        verbose_name = 'user'
+        verbose_name_plural = 'users'
 
     def __str__(self):
         return self.email
+
+class Group(BaseGroup):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'groups'
+        verbose_name = 'group'
+        verbose_name_plural = 'groups'
