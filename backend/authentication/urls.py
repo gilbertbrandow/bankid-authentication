@@ -1,11 +1,11 @@
 """
-URL configuration for project.
+URL configuration for authentication.
 
 """
 
 from django.urls import path
-from . import views
+from .views import UserList
 
 urlpatterns = [
-    path('', views.default, name='default'),
+    path('users', UserList.as_view(), name='users'),
 ]
