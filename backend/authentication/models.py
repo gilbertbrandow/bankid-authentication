@@ -1,6 +1,17 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group
+    
+class AccountManager():
+    def create_user(self, **extra_fields) -> 'Account':
+        Account = self.model(**extra_fields)
+        return Account
+class Account(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
+    objects = AccountManager()
+    
+    REQUIRED_FIELDS = []
 class UserManager(BaseUserManager):
     def create_user(self, email: str, password: str = None, **extra_fields) -> 'User':
         if not email:
@@ -16,6 +27,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
