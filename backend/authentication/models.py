@@ -3,9 +3,28 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+class AccountManager(models.Manager):
+    def create_account(self, title: str, **extra_fields)->'Account':
+        if not title: 
+            raise ValueError('The title field must be set')
+        title = title.strip()
+        account = self.model(title=title, **extra_fields)
+        account.save(using=self._db)
+        return account
+
+class Account(models.Model):
+    title = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = AccountManager()
+    
+    def __str__(self)->str:
+        return str({"type": "account", "id": self.id, "title": self.title})
+
+
 class UserManager(models.Manager):
     def create_user(self, email, password=None, **extra_fields)->'User':
-        if not email:
+        if not email: 
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
@@ -18,17 +37,22 @@ class UserManager(models.Manager):
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
 
+
 class User(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='users')
     email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    password = models.CharField(max_length=128)
 
     objects = UserManager()
+    
+    def get_account(self)->Account:
+        return self.account
 
     def set_password(self, raw_password)->'User':
         self.password = self.hash_password(raw_password)
@@ -53,5 +77,26 @@ class User(models.Model):
             self.set_password(self.password)
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.email
+    def __str__(self)->str:
+        return str({"type": "user", "id": self.id, "email": self.email})
+
+
+class GroupManager(models.Manager):
+    def create_Group(self, title: str, **extra_fields)->'Group':
+        if not title: 
+            raise ValueError('The title field must be set')
+        title = title.strip()
+        Group = self.model(title=title, **extra_fields)
+        Group.save(using=self._db)
+        return Group
+
+class Group(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='users')
+    title = models.CharField(max_length=100, unique=True)
+    users = models.ManyToManyField(User, related_name='groups')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = GroupManager()
+    
+    def __str__(self)->str:
+        return str({"type": "Group", "id": self.id, "title": self.title})
