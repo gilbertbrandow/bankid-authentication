@@ -65,6 +65,14 @@ class UserManager(models.Manager):
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
 
+    def authenticate(self, email, password)->str | None:
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return None
+        if user.check_password(password):
+            return user
+        return None
 
 class User(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='users')
