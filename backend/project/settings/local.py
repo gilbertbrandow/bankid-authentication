@@ -22,7 +22,7 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'authentication.custom_auth.CustomAuthentication',
+        'authentication.jwt_authentication.CustomJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'authentication.permissions.CustomPermission',
