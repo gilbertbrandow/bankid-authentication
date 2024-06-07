@@ -47,6 +47,8 @@ class Permission(models.Model):
         
     def __str__(self)->str:
         return str({"content_type": "permission", "id": self.id, "name": self.name})
+    
+    pass
 
 class UserManager(models.Manager):
     def create_user(self, email, password=None, **extra_fields)->'User':
@@ -110,6 +112,11 @@ class User(models.Model):
     def __str__(self)->str:
         return str({"content_type": "user", "id": self.id, "email": self.email})
 
+class CustomAnonymousUser:
+    is_authenticated = False
+
+    def __str__(self):
+        return 'AnonymousUser'
 class GroupManager(models.Manager):
     def create_Group(self, name: str, **extra_fields)->'Group':
         if not name: 

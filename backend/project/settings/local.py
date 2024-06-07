@@ -4,7 +4,6 @@ Django settings for local environment.
 
 from pathlib import Path
 from project.settings import get_secret
-from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -23,19 +22,15 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'authentication.jwt_authentication.JWTAuthentication',
+        'authentication.custom_auth.CustomAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
+        'authentication.permissions.CustomPermission',
     ),
-}
-
-JWT_AUTH = {
-    'JWT_SECRET_KEY': SECRET_KEY,
-    'JWT_ALGORITHM': 'HS256',
-    'JWT_EXPIRATION_DELTA': timedelta(minutes=5),
-    'JWT_ALLOW_REFRESH': True,
-    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=1),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'UNAUTHENTICATED_USER': 'authentication.models.CustomAnonymousUser',
 }
 
 MIDDLEWARE = [
