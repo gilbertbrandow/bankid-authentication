@@ -85,6 +85,9 @@ class User(models.Model):
     is_superuser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    is_authenticated = True
+
 
     objects = UserManager()
     

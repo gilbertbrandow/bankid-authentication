@@ -7,22 +7,17 @@ from rest_framework import status
 from .models import User, Account
 from .serializers import UserSerializer, AccountSerializer
 from rest_framework.permissions import IsAuthenticated
-from .models import User
-
+from .jwt_authentication import generate_jwt
 class ObtainJWTToken(APIView):
+    permission_classes = []
+    
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
         user = User.objects.authenticate(email=email, password=password)
         
         if user is not None:
-            payload = {
-                'user_id': user.id,
-                'exp': datetime.utcnow() + timedelta(hours=24),
-                'iat': datetime.utcnow(), 
-            }
-            token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-            return Response({'token': token}, status=status.HTTP_200_OK)
+            return Response({'token': generate_jwt(user)}, status=status.HTTP_200_OK)
         
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
