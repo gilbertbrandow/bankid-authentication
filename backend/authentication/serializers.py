@@ -12,6 +12,9 @@ class PermissionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
+    
+    is_active = serializers.BooleanField(default=True)
+    
     class Meta:
         model = User
         fields = '__all__'

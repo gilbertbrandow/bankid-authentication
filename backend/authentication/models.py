@@ -68,11 +68,11 @@ class UserManager(models.Manager):
 
 class User(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='users')
-    permissions = models.ManyToManyField(Permission, related_name='users', db_table='authentication_user_permission')
+    permissions = models.ManyToManyField(Permission, related_name='users', db_table='authentication_user_permission', blank=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=30, blank=True)
+    first_name = models.CharField(max_length=30, blank=False)
+    last_name = models.CharField(max_length=30, blank=False)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -80,28 +80,28 @@ class User(models.Model):
 
     objects = UserManager()
     
-    def get_account(self)->Account:
+    def get_account(self) -> Account:
         return self.account
 
-    def set_password(self, raw_password)->'User':
+    def set_password(self, raw_password) -> 'User':
         self.password = self.hash_password(raw_password)
         return self
 
-    def check_password(self, raw_password)->bool:
+    def check_password(self, raw_password) -> bool:
         return bcrypt.checkpw(raw_password.encode('utf-8'), self.password.encode('utf-8'))
 
-    def hash_password(self, raw_password)->str:
+    def hash_password(self, raw_password) -> str:
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(raw_password.encode('utf-8'), salt)
         return hashed_password.decode('utf-8')
 
-    def clean(self)->None:
+    def clean(self) -> None:
         if not self.email:
             raise ValidationError(_('Email field cannot be empty'))
         if not self.password:
             raise ValidationError(_('Password field cannot be empty'))
 
-    def save(self, *args, **kwargs)->None:
+    def save(self, *args, **kwargs) -> None:
         if self.pk is None and self.password:
             self.set_password(self.password)
         super().save(*args, **kwargs)
@@ -109,7 +109,7 @@ class User(models.Model):
     class Meta:
         db_table = 'authentication_users'
         
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return str({"content_type": "user", "id": self.id, "email": self.email})
 
 class CustomAnonymousUser:
