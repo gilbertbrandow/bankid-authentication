@@ -1,12 +1,22 @@
 import jwt
-from datetime import timedelta
-from datetime import datetime
+from datetime import timedelta, datetime
 from django.conf import settings
 from rest_framework import authentication, exceptions
 from .models import User
 
 class CustomJWTAuthentication(authentication.BaseAuthentication):
-    def authenticate(self, request):
+    """
+    Custom JWT Authentication class.
+    """
+    
+    def authenticate(self, request) -> tuple:
+        """
+        Authenticate the request using JWT token.
+
+        @param request: The HTTP request object.
+        @return: A tuple containing the user and the token if authentication is successful, or None if no auth header is provided.
+        @exception: Raises AuthenticationFailed if the token is invalid, expired, or if the user does not exist.
+        """
         auth_header = request.headers.get('Authorization')
 
         if not auth_header:
@@ -29,13 +39,22 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
 
         return (user, token)
 
-    def authenticate_header(self, request):
+    def authenticate_header(self, request) -> str:
+        """
+        Return the authentication header.
+
+        @param request: The HTTP request object.
+        @return: The authentication header string.
+        """
         return 'Bearer'
 
 
-def generate_jwt(user) -> str:
+def generate_jwt(user: User) -> str:
     """
-    Django config(where the settings originate) are specified in the settings/ folder 
+    Generate a JWT token for the given user.
+
+    @param user: The user for whom the JWT token is being generated.
+    @return: A JWT token as a string.
     """
     payload = {
         'user_id': user.id,

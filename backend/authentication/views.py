@@ -1,6 +1,4 @@
-import jwt
-from django.conf import settings
-from datetime import datetime, timedelta
+from django.http import HttpRequest
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,7 +9,7 @@ from .jwt_authentication import generate_jwt
 class ObtainJWTToken(APIView):
     permission_classes = []
     
-    def post(self, request):
+    def post(self, request: HttpRequest) -> Response:
         email = request.data.get('email')
         password = request.data.get('password')
         user = User.objects.authenticate(email=email, password=password)
@@ -24,12 +22,12 @@ class ObtainJWTToken(APIView):
 class AccountList(APIView):
     permission_classes = []
 
-    def get(self, request):
+    def get(self, request: HttpRequest):
         Accounts = Account.objects.all()
         serializer = AccountSerializer(Accounts, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request: HttpRequest):
         serializer = AccountSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
