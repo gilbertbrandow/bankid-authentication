@@ -19,9 +19,8 @@ class ObtainJWTToken(APIView):
         
         return Response({'token': generate_jwt(user)}, status=status.HTTP_200_OK)
         
-
 class AccountList(APIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get(self, request: HttpRequest) -> Response:
         Accounts = Account.objects.all()
@@ -35,6 +34,63 @@ class AccountList(APIView):
         
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class AccountDetail(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def get_object(pk: int) -> Account | None:
+        try:
+            return Account.objects.get(pk=pk)
+        except Account.DoesNotExist:
+            return None
+
+    def get(self, request: HttpRequest, pk: int) -> Account:
+        account = self.get_object(pk)
+        
+        if account is None:
+            return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = AccountSerializer(account)
+        return Response(serializer.data)
+
+    def put(self, request: HttpRequest, pk: int) -> Account:
+        account = self.get_object(pk)
+        
+        if account is None:
+            return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = AccountSerializer(account, data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data)
+
+    def patch(self, request: HttpRequest, pk: int) -> Account:
+        account = self.get_object(pk)
+        
+        if account is None:
+            return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = AccountSerializer(account, data=request.data, partial=True)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data)
+        
+    def delete(self, request: HttpRequest, pk: int) -> Account:
+        account = self.get_object(pk)
+        
+        if account is None:
+            return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        account.delete()
+        return Response({'success': 'Account deleted.'}, status=status.HTTP_204_NO_CONTENT)
+
 
 class GroupList(APIView):
     permission_classes = [IsAuthenticated]
@@ -57,7 +113,8 @@ class GroupList(APIView):
 class GroupDetail(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk: int) -> Group | None:
+    @staticmethod
+    def get_object(pk: int) -> Group | None:
         try:
             return Group.objects.get(pk=pk)
         except Group.DoesNotExist:
@@ -125,3 +182,60 @@ class UserList(APIView):
         
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class UserDetail(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def get_object(pk: int) -> User | None:
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return None
+
+    def get(self, request: HttpRequest, pk: int) -> User:
+        user = self.get_object(pk)
+        
+        if user is None:
+            return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    def put(self, request: HttpRequest, pk: int) -> User:
+        user = self.get_object(pk)
+        
+        if user is None:
+            return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = UserSerializer(user, data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data)
+
+    def patch(self, request: HttpRequest, pk: int) -> User:
+        user = self.get_object(pk)
+        
+        if user is None:
+            return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = UserSerializer(user, data=request.data, partial=True)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data)
+        
+    def delete(self, request: HttpRequest, pk: int) -> User:
+        user = self.get_object(pk)
+        
+        if user is None:
+            return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        user.delete()
+        return Response({'success': 'User deleted.'}, status=status.HTTP_204_NO_CONTENT)
+    
