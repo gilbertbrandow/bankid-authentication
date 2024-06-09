@@ -14,52 +14,114 @@ class ObtainJWTToken(APIView):
         password = request.data.get('password')
         user = User.objects.authenticate(email=email, password=password)
         
-        if user is not None:
-            return Response({'token': generate_jwt(user)}, status=status.HTTP_200_OK)
+        if user is None:
+            return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'token': generate_jwt(user)}, status=status.HTTP_200_OK)
+        
 
 class AccountList(APIView):
     permission_classes = []
 
-    def get(self, request: HttpRequest):
+    def get(self, request: HttpRequest) -> Response:
         Accounts = Account.objects.all()
         serializer = AccountSerializer(Accounts, many=True)
         return Response(serializer.data)
 
-    def post(self, request: HttpRequest):
+    def post(self, request: HttpRequest) -> Response:
         serializer = AccountSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class GroupList(APIView):
     permission_classes = [IsAuthenticated]
     
-    def get(self, request: HttpRequest):
+    def get(self, request: HttpRequest) -> Response:
         Groups = Group.objects.all()
         serializer = GroupSerializer(Groups, many=True)
         return Response(serializer.data)
 
-    def post(self, request: HttpRequest):
+    def post(self, request: HttpRequest) -> Response:
         serializer = GroupSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+
+class GroupDetail(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk: int) -> Group | None:
+        try:
+            return Group.objects.get(pk=pk)
+        except Group.DoesNotExist:
+            return None
+
+    def get(self, request: HttpRequest, pk: int) -> Group:
+        group = self.get_object(pk)
+        
+        if group is None:
+            return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = GroupSerializer(group)
+        return Response(serializer.data)
+
+    def put(self, request: HttpRequest, pk: int) -> Group:
+        group = self.get_object(pk)
+        
+        if group is None:
+            return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = GroupSerializer(group, data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data)
+
+    def patch(self, request: HttpRequest, pk: int) -> Group:
+        group = self.get_object(pk)
+        
+        if group is None:
+            return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = GroupSerializer(group, data=request.data, partial=True)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data)
+        
+    def delete(self, request: HttpRequest, pk: int) -> Group:
+        group = self.get_object(pk)
+        
+        if group is None:
+            return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        group.delete()
+        return Response({'success': 'Group deleted.'}, status=status.HTTP_204_NO_CONTENT)
     
 class UserList(APIView):
     permission_classes = [IsAuthenticated]
     
-    def get(self, request: HttpRequest):
+    def get(self, request: HttpRequest) -> Response:
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-    def post(self, request: HttpRequest):
+    def post(self, request: HttpRequest) -> Response:
         serializer = UserSerializer(data=request.data)
+        
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
