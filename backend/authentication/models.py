@@ -76,7 +76,7 @@ class UserManager(models.Manager):
 
 class User(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='users')
-    permissions = models.ManyToManyField(Permission, related_name='users', db_table='authentication_user_permission', blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name='users', db_table='authentication_user_permission', blank=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
     first_name = models.CharField(max_length=30, blank=False)
