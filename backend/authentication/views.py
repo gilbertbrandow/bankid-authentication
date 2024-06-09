@@ -2,8 +2,8 @@ from django.http import HttpRequest
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import User, Account
-from .serializers import UserSerializer, AccountSerializer
+from .models import User, Account, Group
+from .serializers import UserSerializer, AccountSerializer, GroupSerializer
 from rest_framework.permissions import IsAuthenticated
 from .jwt_authentication import generate_jwt
 class ObtainJWTToken(APIView):
@@ -34,15 +34,30 @@ class AccountList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class GroupList(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request: HttpRequest):
+        Groups = Group.objects.all()
+        serializer = GroupSerializer(Groups, many=True)
+        return Response(serializer.data)
+
+    def post(self, request: HttpRequest):
+        serializer = GroupSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class UserList(APIView):
     permission_classes = [IsAuthenticated]
     
-    def get(self, request):
+    def get(self, request: HttpRequest):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request: HttpRequest):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

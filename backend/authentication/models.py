@@ -139,9 +139,9 @@ class GroupManager(models.Manager):
 
 class Group(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='groups')
-    name = models.CharField(max_length=100, unique=True)
-    users = models.ManyToManyField(User, related_name='groups', db_table='authentication_group_user')
-    permissions = models.ManyToManyField(Permission, related_name='groups',  db_table='authentication_group_permission')
+    name = models.CharField(max_length=100)
+    users = models.ManyToManyField(User, related_name='groups', db_table='authentication_group_user', blank=True)
+    permissions = models.ManyToManyField(Permission, related_name='groups',  db_table='authentication_group_permission', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = GroupManager()
