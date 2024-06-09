@@ -25,7 +25,7 @@ REST_FRAMEWORK = {
         'authentication.jwt_authentication.CustomJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'authentication.permissions.CustomPermission',
+        'authentication.permissions.IsAuthenticated',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
