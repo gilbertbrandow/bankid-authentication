@@ -1,18 +1,17 @@
-from django.http import HttpRequest
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.request import Request
+from rest_framework.response import Response
 from .models import User, Account, Group, Permission
 from .serializers import UserSerializer, AccountSerializer, GroupSerializer, PermissionSerializer
-from rest_framework.permissions import IsAuthenticated
+from .permissions import IsAuthenticated, IsSuperuser
 from .jwt_authentication import generate_jwt
-
 
 class ObtainJWTToken(APIView):
     permission_classes = []
 
     @staticmethod
-    def post(request: HttpRequest) -> Response:
+    def post(request: Request) -> Response:
         email = request.data.get('email')
         password = request.data.get('password')
         user = User.objects.authenticate(email=email, password=password)
@@ -24,16 +23,16 @@ class ObtainJWTToken(APIView):
 
 
 class AccountList(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSuperuser]
 
     @staticmethod
-    def get(request: HttpRequest) -> Response:
+    def get(request: Request) -> Response:
         Accounts = Account.objects.all()
         serializer = AccountSerializer(Accounts, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(request: HttpRequest) -> Response:
+    def post(request: Request) -> Response:
         serializer = AccountSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -43,7 +42,7 @@ class AccountList(APIView):
 
 
 class AccountDetail(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSuperuser]
 
     @staticmethod
     def get_object(pk: int) -> Account | None:
@@ -52,7 +51,7 @@ class AccountDetail(APIView):
         except Account.DoesNotExist:
             return None
 
-    def get(self, request: HttpRequest, pk: int) -> Account:
+    def get(self, request: Request, pk: int) -> Account:
         account = self.get_object(pk)
 
         if account is None:
@@ -61,7 +60,7 @@ class AccountDetail(APIView):
         serializer = AccountSerializer(account)
         return Response(serializer.data)
 
-    def put(self, request: HttpRequest, pk: int) -> Account:
+    def put(self, request: Request, pk: int) -> Account:
         account = self.get_object(pk)
 
         if account is None:
@@ -75,7 +74,7 @@ class AccountDetail(APIView):
         serializer.save()
         return Response(serializer.data)
 
-    def patch(self, request: HttpRequest, pk: int) -> Account:
+    def patch(self, request: Request, pk: int) -> Account:
         account = self.get_object(pk)
 
         if account is None:
@@ -90,7 +89,7 @@ class AccountDetail(APIView):
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request: HttpRequest, pk: int) -> Account:
+    def delete(self, request: Request, pk: int) -> Account:
         account = self.get_object(pk)
 
         if account is None:
@@ -104,13 +103,13 @@ class GroupList(APIView):
     permission_classes = [IsAuthenticated]
 
     @staticmethod
-    def get(request: HttpRequest) -> Response:
+    def get(request: Request) -> Response:
         Groups = Group.objects.all()
         serializer = GroupSerializer(Groups, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(request: HttpRequest) -> Response:
+    def post(request: Request) -> Response:
         serializer = GroupSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -130,7 +129,7 @@ class GroupDetail(APIView):
         except Group.DoesNotExist:
             return None
 
-    def get(self, request: HttpRequest, pk: int) -> Group:
+    def get(self, request: Request, pk: int) -> Group:
         group = self.get_object(pk)
 
         if group is None:
@@ -139,7 +138,7 @@ class GroupDetail(APIView):
         serializer = GroupSerializer(group)
         return Response(serializer.data)
 
-    def put(self, request: HttpRequest, pk: int) -> Group:
+    def put(self, request: Request, pk: int) -> Group:
         group = self.get_object(pk)
 
         if group is None:
@@ -153,7 +152,7 @@ class GroupDetail(APIView):
         serializer.save()
         return Response(serializer.data)
 
-    def patch(self, request: HttpRequest, pk: int) -> Group:
+    def patch(self, request: Request, pk: int) -> Group:
         group = self.get_object(pk)
 
         if group is None:
@@ -167,7 +166,7 @@ class GroupDetail(APIView):
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request: HttpRequest, pk: int) -> Group:
+    def delete(self, request: Request, pk: int) -> Group:
         group = self.get_object(pk)
 
         if group is None:
@@ -181,13 +180,13 @@ class UserList(APIView):
     permission_classes = [IsAuthenticated]
 
     @staticmethod
-    def get(request: HttpRequest) -> Response:
+    def get(request: Request) -> Response:
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(request: HttpRequest) -> Response:
+    def post(request: Request) -> Response:
         serializer = UserSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -207,7 +206,7 @@ class UserDetail(APIView):
         except User.DoesNotExist:
             return None
 
-    def get(self, request: HttpRequest, pk: int) -> User:
+    def get(self, request: Request, pk: int) -> User:
         user = self.get_object(pk)
 
         if user is None:
@@ -216,7 +215,7 @@ class UserDetail(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
-    def put(self, request: HttpRequest, pk: int) -> User:
+    def put(self, request: Request, pk: int) -> User:
         user = self.get_object(pk)
 
         if user is None:
@@ -230,7 +229,7 @@ class UserDetail(APIView):
         serializer.save()
         return Response(serializer.data)
 
-    def patch(self, request: HttpRequest, pk: int) -> User:
+    def patch(self, request: Request, pk: int) -> User:
         user = self.get_object(pk)
 
         if user is None:
@@ -244,7 +243,7 @@ class UserDetail(APIView):
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request: HttpRequest, pk: int) -> User:
+    def delete(self, request: Request, pk: int) -> User:
         user = self.get_object(pk)
 
         if user is None:
@@ -255,16 +254,19 @@ class UserDetail(APIView):
 
 
 class PermissionList(APIView):
-    permission_classes = [IsAuthenticated]
-
+    def get_permissions(self) -> list:
+        if self.request.method == 'POST':
+            return [IsAuthenticated, IsSuperuser]
+        return [IsAuthenticated]
+    
     @staticmethod
-    def get(request: HttpRequest) -> Response:
+    def get(request: Request) -> Response:
         Permissions = Permission.objects.all()
         serializer = PermissionSerializer(Permissions, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(request: HttpRequest) -> Response:
+    def post(request: Request) -> Response:
         serializer = PermissionSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -273,7 +275,11 @@ class PermissionList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class PermissionDetail(APIView):
-    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self) -> list:
+        if self.request.method == 'GET':
+            return [IsAuthenticated]
+        return [IsAuthenticated, IsSuperuser]
 
     @staticmethod
     def get_object(pk: int) -> Permission | None:
@@ -282,7 +288,7 @@ class PermissionDetail(APIView):
         except Permission.DoesNotExist:
             return None
 
-    def get(self, request: HttpRequest, pk: int) -> Permission:
+    def get(self, request: Request, pk: int) -> Permission:
         permission = self.get_object(pk)
 
         if permission is None:
@@ -291,7 +297,7 @@ class PermissionDetail(APIView):
         serializer = PermissionSerializer(permission)
         return Response(serializer.data)
 
-    def put(self, request: HttpRequest, pk: int) -> Permission:
+    def put(self, request: Request, pk: int) -> Permission:
         permission = self.get_object(pk)
 
         if permission is None:
@@ -305,7 +311,7 @@ class PermissionDetail(APIView):
         serializer.save()
         return Response(serializer.data)
 
-    def patch(self, request: HttpRequest, pk: int) -> Permission:
+    def patch(self, request: Request, pk: int) -> Permission:
         permission = self.get_object(pk)
 
         if permission is None:
@@ -320,7 +326,7 @@ class PermissionDetail(APIView):
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request: HttpRequest, pk: int) -> Permission:
+    def delete(self, request: Request, pk: int) -> Permission:
         permission = self.get_object(pk)
 
         if permission is None:
