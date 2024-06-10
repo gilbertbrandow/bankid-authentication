@@ -19,7 +19,7 @@ class Command(BaseCommand):
         }
 
         for model, codenames in models_permissions.items():
-            content_type = ContentType.objects.get(model=model)
+            content_type = ContentType.objects.get(app_label='authentication', model=model)
             for codename in codenames:
                 name = f"Can {codename.split('_')[0]} {model}"
                 permission, created = Permission.objects.get_or_create(
