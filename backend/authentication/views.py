@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from .models import User, Account, Group, Permission
 from .serializers import UserSerializer, AccountSerializer, GroupSerializer, PermissionSerializer
 from .permissions import IsAuthenticated, IsSuperuser
-from .jwt_authentication import generate_jwt
+from .jwt_authentication import CustomJWTAuthentication
 
 class ObtainJWTToken(APIView):
     permission_classes = []
@@ -19,7 +19,7 @@ class ObtainJWTToken(APIView):
         if user is None:
             return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response({'token': generate_jwt(user)}, status=status.HTTP_200_OK)
+        return Response({'token': CustomJWTAuthentication.generate_jwt(user)}, status=status.HTTP_200_OK)
 
 
 class AccountList(APIView):

@@ -9,8 +9,8 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
     """
     Custom JWT Authentication class.
     """
-    
-    def authenticate(self, request: Request) -> tuple:
+    @staticmethod
+    def authenticate(request: Request) -> tuple[User, str] | None:
         """
         Authenticate the request using JWT token.
 
@@ -40,7 +40,8 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
 
         return (user, token)
 
-    def authenticate_header(self, request: Request) -> str:
+    @staticmethod
+    def authenticate_header(request: Request) -> str:
         """
         Return the authentication header.
 
@@ -49,20 +50,20 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
         """
         return 'Bearer'
 
+    @staticmethod
+    def generate_jwt(user: User) -> str:
+        """
+        Generate a JWT token for the given user.
 
-def generate_jwt(user: User) -> str:
-    """
-    Generate a JWT token for the given user.
-
-    @param user: The user for whom the JWT token is being generated.
-    @return: A JWT token as a string.
-    """
-    payload = {
-        'user_id': user.id,
-        'exp': datetime.utcnow() + settings.JWT_AUTH['JWT_EXPIRATION_DELTA'],
-        'iat': datetime.utcnow()
-    }
-    token = jwt.encode(
-        payload=payload, key=settings.JWT_AUTH['JWT_SECRET_KEY'], algorithm=settings.JWT_AUTH['JWT_ALGORITHM']
-    )
-    return token
+        @param user: The user for whom the JWT token is being generated.
+        @return: A JWT token as a string.
+        """
+        payload = {
+            'user_id': user.id,
+            'exp': datetime.utcnow() + settings.JWT_AUTH['JWT_EXPIRATION_DELTA'],
+            'iat': datetime.utcnow()
+        }
+        token = jwt.encode(
+            payload=payload, key=settings.JWT_AUTH['JWT_SECRET_KEY'], algorithm=settings.JWT_AUTH['JWT_ALGORITHM']
+        )
+        return token
