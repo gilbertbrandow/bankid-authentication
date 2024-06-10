@@ -4,8 +4,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from .models import User, Account, Group, Permission
 from .serializers import UserSerializer, AccountSerializer, GroupSerializer, PermissionSerializer
-from .permissions import IsAuthenticated, IsSuperuser
+from .permissions import IsAuthenticated, IsSuperuser, IsSameAccountOrIsSuperuser
 from .jwt_authentication import CustomJWTAuthentication
+
 
 class ObtainJWTToken(APIView):
     permission_classes = []
@@ -23,7 +24,7 @@ class ObtainJWTToken(APIView):
 
 
 class AccountList(APIView):
-    permission_classes = [IsAuthenticated, IsSuperuser]
+    permission_classes = [IsSuperuser]
 
     @staticmethod
     def get(request: Request) -> Response:
@@ -42,7 +43,7 @@ class AccountList(APIView):
 
 
 class AccountDetail(APIView):
-    permission_classes = [IsAuthenticated, IsSuperuser]
+    permission_classes = [IsSameAccountOrIsSuperuser]
 
     @staticmethod
     def get_object(pk: int) -> Account | None:
@@ -57,6 +58,8 @@ class AccountDetail(APIView):
         if account is None:
             return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        self.check_object_permissions(request, account)
+
         serializer = AccountSerializer(account)
         return Response(serializer.data)
 
@@ -65,6 +68,8 @@ class AccountDetail(APIView):
 
         if account is None:
             return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        self.check_object_permissions(request, account)
 
         serializer = AccountSerializer(account, data=request.data)
 
@@ -80,6 +85,8 @@ class AccountDetail(APIView):
         if account is None:
             return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        self.check_object_permissions(request, account)
+
         serializer = AccountSerializer(
             account, data=request.data, partial=True)
 
@@ -94,6 +101,8 @@ class AccountDetail(APIView):
 
         if account is None:
             return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        self.check_object_permissions(request, account)
 
         account.delete()
         return Response({'success': 'Account deleted.'}, status=status.HTTP_204_NO_CONTENT)
@@ -120,7 +129,7 @@ class GroupList(APIView):
 
 
 class GroupDetail(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsSameAccountOrIsSuperuser]
 
     @staticmethod
     def get_object(pk: int) -> Group | None:
@@ -135,6 +144,8 @@ class GroupDetail(APIView):
         if group is None:
             return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        self.check_object_permissions(request, group)
+
         serializer = GroupSerializer(group)
         return Response(serializer.data)
 
@@ -143,6 +154,8 @@ class GroupDetail(APIView):
 
         if group is None:
             return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        self.check_object_permissions(request, group)
 
         serializer = GroupSerializer(group, data=request.data)
 
@@ -158,6 +171,8 @@ class GroupDetail(APIView):
         if group is None:
             return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        self.check_object_permissions(request, group)
+
         serializer = GroupSerializer(group, data=request.data, partial=True)
 
         if not serializer.is_valid():
@@ -171,6 +186,8 @@ class GroupDetail(APIView):
 
         if group is None:
             return Response({'detail': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        self.check_object_permissions(request, group)
 
         group.delete()
         return Response({'success': 'Group deleted.'}, status=status.HTTP_204_NO_CONTENT)
@@ -197,7 +214,7 @@ class UserList(APIView):
 
 
 class UserDetail(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsSameAccountOrIsSuperuser]
 
     @staticmethod
     def get_object(pk: int) -> User | None:
@@ -212,6 +229,8 @@ class UserDetail(APIView):
         if user is None:
             return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        self.check_object_permissions(request, user)
+
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
@@ -220,6 +239,8 @@ class UserDetail(APIView):
 
         if user is None:
             return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        self.check_object_permissions(request, user)
 
         serializer = UserSerializer(user, data=request.data)
 
@@ -235,6 +256,8 @@ class UserDetail(APIView):
         if user is None:
             return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        self.check_object_permissions(request, user)
+
         serializer = UserSerializer(user, data=request.data, partial=True)
 
         if not serializer.is_valid():
@@ -249,16 +272,19 @@ class UserDetail(APIView):
         if user is None:
             return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        self.check_object_permissions(request, user)
+
         user.delete()
         return Response({'success': 'User deleted.'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class PermissionList(APIView):
+
     def get_permissions(self) -> list:
         if self.request.method == 'POST':
-            return [IsAuthenticated, IsSuperuser]
+            return [IsSuperuser]
         return [IsAuthenticated]
-    
+
     @staticmethod
     def get(request: Request) -> Response:
         Permissions = Permission.objects.all()
@@ -274,12 +300,13 @@ class PermissionList(APIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
 class PermissionDetail(APIView):
-    
+
     def get_permissions(self) -> list:
         if self.request.method == 'GET':
             return [IsAuthenticated]
-        return [IsAuthenticated, IsSuperuser]
+        return [IsSuperuser]
 
     @staticmethod
     def get_object(pk: int) -> Permission | None:
