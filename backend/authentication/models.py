@@ -75,7 +75,10 @@ class UserManager(models.Manager):
         return None
 
 class User(models.Model):
+    objects = UserManager()
+    
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='users')
+    """Should not be used for checking when permissions, needs to include all permissions in the users groups"""
     user_permissions = models.ManyToManyField(Permission, related_name='users', db_table='authentication_user_permission', blank=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
@@ -86,8 +89,16 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_authenticated = True
-
-    objects = UserManager()
+    
+    @property
+    def permissions(self) -> set[Permission]:
+        user_permissions = set(self.user_permissions.all())
+        
+        group_permissions = set()
+        for group in self.groups.all():
+            group_permissions.update(group.permissions.all())
+        
+        return user_permissions | group_permissions
     
     def get_account(self) -> Account:
         return self.account
@@ -114,17 +125,6 @@ class User(models.Model):
         if self.pk is None and self.password:
             self.set_password(self.password)
         super().save(*args, **kwargs)
-
-    @property
-    def permissions(self):
-        user_permissions = set(self.user_permissions.all())
-        
-        group_permissions = set()
-        for group in self.groups.all():
-            group_permissions.update(group.permissions.all())
-        
-        all_permissions = user_permissions | group_permissions
-        return all_permissions
     
     class Meta:
         db_table = 'authentication_users'
