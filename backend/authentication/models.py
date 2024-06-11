@@ -85,9 +85,7 @@ class User(models.Model):
     is_superuser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     is_authenticated = True
-
 
     objects = UserManager()
     
@@ -116,7 +114,18 @@ class User(models.Model):
         if self.pk is None and self.password:
             self.set_password(self.password)
         super().save(*args, **kwargs)
+
+    @property
+    def permissions(self):
+        user_permissions = set(self.user_permissions.all())
         
+        group_permissions = set()
+        for group in self.groups.all():
+            group_permissions.update(group.permissions.all())
+        
+        all_permissions = user_permissions | group_permissions
+        return all_permissions
+    
     class Meta:
         db_table = 'authentication_users'
         
