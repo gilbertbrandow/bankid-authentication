@@ -1,14 +1,14 @@
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
+from .views_base import CustomAPIView
 from .models import User, Account, Group, Permission
 from .serializers import UserSerializer, AccountSerializer, GroupSerializer, PermissionSerializer
 from .permissions import IsAuthenticated, IsSuperuser, IsSameAccountOrIsSuperuser, HasPermission
 from .jwt_authentication import CustomJWTAuthentication
 
 
-class ObtainJWTToken(APIView):
+class ObtainJWTToken(CustomAPIView):
     permission_classes = []
 
     @staticmethod
@@ -23,7 +23,7 @@ class ObtainJWTToken(APIView):
         return Response({'token': CustomJWTAuthentication.generate_jwt(user)}, status=status.HTTP_200_OK)
 
 
-class AccountList(APIView):
+class AccountList(CustomAPIView):
     permission_classes = [IsSuperuser]
 
     @staticmethod
@@ -42,7 +42,7 @@ class AccountList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class AccountDetail(APIView):
+class AccountDetail(CustomAPIView):
     permission_classes = [IsSameAccountOrIsSuperuser]
 
     @staticmethod
@@ -108,14 +108,10 @@ class AccountDetail(APIView):
         return Response({'success': 'Account deleted.'}, status=status.HTTP_204_NO_CONTENT)
 
 
-class GroupList(APIView):
-    permission_classes = [IsAuthenticated]
+class GroupList(CustomAPIView):
     
     def get_permissions(self):
-        """
-        Dynamically set the required permissions based on the request method.
-        """
-        permissions = super().get_permissions()
+        permissions = [IsAuthenticated()]
 
         if self.request.method == 'GET':
             permissions.append(HasPermission(permission_codename='view_group'))
@@ -140,18 +136,13 @@ class GroupList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class GroupDetail(APIView):
-    permission_classes = [IsSameAccountOrIsSuperuser]
-
+class GroupDetail(CustomAPIView):
     def get_permissions(self):
-        """
-        Dynamically set the required permissions based on the request method.
-        """
-        permissions = super().get_permissions()
-
+        permissions = [IsSameAccountOrIsSuperuser()]
+        
         if self.request.method == 'GET':
             permissions.append(HasPermission(permission_codename='view_group'))
-        elif self.request.method == 'PUT' or self.request.method == 'PATCH':
+        elif self.request.method in ['PUT', 'PATCH']:
             permissions.append(HasPermission(permission_codename='change_group'))
         elif self.request.method == 'DELETE':
             permissions.append(HasPermission(permission_codename='delete_group'))
@@ -220,7 +211,7 @@ class GroupDetail(APIView):
         return Response({'success': 'Group deleted.'}, status=status.HTTP_204_NO_CONTENT)
 
 
-class UserList(APIView):
+class UserList(CustomAPIView):
     permission_classes = [IsAuthenticated]
 
     @staticmethod
@@ -240,7 +231,7 @@ class UserList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class UserDetail(APIView):
+class UserDetail(CustomAPIView):
     permission_classes = [IsSameAccountOrIsSuperuser]
 
     @staticmethod
@@ -305,7 +296,7 @@ class UserDetail(APIView):
         return Response({'success': 'User deleted.'}, status=status.HTTP_204_NO_CONTENT)
 
 
-class PermissionList(APIView):
+class PermissionList(CustomAPIView):
 
     def get_permissions(self) -> list:
         if self.request.method == 'POST':
@@ -328,7 +319,7 @@ class PermissionList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class PermissionDetail(APIView):
+class PermissionDetail(CustomAPIView):
 
     def get_permissions(self) -> list:
         if self.request.method == 'GET':
