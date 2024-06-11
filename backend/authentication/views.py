@@ -4,7 +4,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from .models import User, Account, Group, Permission
 from .serializers import UserSerializer, AccountSerializer, GroupSerializer, PermissionSerializer
-from .permissions import IsAuthenticated, IsSuperuser, IsSameAccountOrIsSuperuser
+from .permissions import IsAuthenticated, IsSuperuser, IsSameAccountOrIsSuperuser, HasPermission
 from .jwt_authentication import CustomJWTAuthentication
 
 
@@ -110,6 +110,18 @@ class AccountDetail(APIView):
 
 class GroupList(APIView):
     permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        """
+        Dynamically set the required permissions based on the request method.
+        """
+        permissions = super().get_permissions()
+
+        if self.request.method == 'GET':
+            permissions.append(HasPermission(permission_codename='view_group'))
+        elif self.request.method == 'POST':
+            permissions.append(HasPermission(permission_codename='add_group'))
+        return permissions
 
     @staticmethod
     def get(request: Request) -> Response:
@@ -130,6 +142,21 @@ class GroupList(APIView):
 
 class GroupDetail(APIView):
     permission_classes = [IsSameAccountOrIsSuperuser]
+
+    def get_permissions(self):
+        """
+        Dynamically set the required permissions based on the request method.
+        """
+        permissions = super().get_permissions()
+
+        if self.request.method == 'GET':
+            permissions.append(HasPermission(permission_codename='view_group'))
+        elif self.request.method == 'PUT' or self.request.method == 'PATCH':
+            permissions.append(HasPermission(permission_codename='change_group'))
+        elif self.request.method == 'DELETE':
+            permissions.append(HasPermission(permission_codename='delete_group'))
+
+        return permissions
 
     @staticmethod
     def get_object(pk: int) -> Group | None:
