@@ -41,3 +41,18 @@ class IsSameAccountOrIsSuperuser(BasePermission):
             return request.user.is_authenticated and obj == request.user.account
 
         return request.user.is_authenticated and hasattr(obj, 'account') and obj.account == request.user.account
+
+class HasPermission(BasePermission):
+    """
+    Custom permission to allow access if the user has the specified permission.
+    """
+    def __init__(self, permission_codename: str) -> None:
+        self.permission_codename = permission_codename
+
+    def has_permission(self, request: Request, view: 'Type[APIView]') -> bool:
+        user = request.user
+        
+        if not user or not user.is_authenticated:
+            return False
+
+        return any(permission.codename == self.permission_codename for permission in user.permissions)
