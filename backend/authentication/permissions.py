@@ -57,10 +57,10 @@ class HasPermission(BasePermission):
 
     def has_permission(self, request: Request, view: 'Type[APIView]') -> bool:
         user = request.user
-
-        if user and user.is_authenticated and any(permission.codename == self.permission_codename for permission in user.permissions):
+        
+        if user.is_superuser or (user and user.is_authenticated and any(permission.codename == self.permission_codename for permission in user.permissions)):
             return True
-
+        
         permission = Permission.objects.get(codename=self.permission_codename)
 
         raise PermissionDenied(
