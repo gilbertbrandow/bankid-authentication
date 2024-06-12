@@ -6,7 +6,7 @@ from .models import User, Account, Group, Permission
 from .serializers import UserSerializer, AccountSerializer, GroupSerializer, PermissionSerializer
 from .permissions import IsAuthenticated, IsSuperuser, IsSameAccountOrIsSuperuser, HasPermission
 from .jwt_authentication import CustomJWTAuthentication
-from .decorators import get_and_check_object_permissions, check_permission
+from .decorators import get_and_check_object_permissions, check_permission, superuser_permission
 
 
 class ObtainJWTToken(CustomAPIView):
@@ -25,7 +25,7 @@ class ObtainJWTToken(CustomAPIView):
 
 
 class AccountList(CustomAPIView):
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated, IsSuperuser]
 
     @staticmethod
     def get(request: Request) -> Response:
@@ -44,7 +44,7 @@ class AccountList(CustomAPIView):
 
 
 class AccountDetail(CustomAPIView):
-    permission_classes = [IsSameAccountOrIsSuperuser]
+    permission_classes = [IsAuthenticated, IsSameAccountOrIsSuperuser]
 
     @get_and_check_object_permissions(Account)
     @check_permission('view_account')
@@ -78,6 +78,7 @@ class AccountDetail(CustomAPIView):
         serializer.save()
         return Response(serializer.data)
 
+    @superuser_permission()
     @get_and_check_object_permissions(Account)
     def delete(self, request: Request, account: Account) -> Response:
         account.delete()
