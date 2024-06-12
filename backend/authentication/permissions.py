@@ -1,11 +1,10 @@
 from rest_framework.permissions import BasePermission
-from .exceptions import CustomPermissionDenied
+from .exceptions import PermissionDenied
 from rest_framework.request import Request
 from authentication.models import Account
 from typing import Type, TYPE_CHECKING
 from django.db import models
 from authentication.models import Permission
-
 
 if TYPE_CHECKING:
     from rest_framework.views import APIView
@@ -19,7 +18,9 @@ class IsAuthenticated(BasePermission):
     def has_permission(request: Request, view: 'Type[APIView]') -> bool:
         if request.user and request.user.is_authenticated:
             return True
-        raise CustomPermissionDenied(detail='You must be signed in to perform this action.')
+        raise PermissionDenied(
+            detail='You must be signed in to perform this action.')
+
 
 class IsSuperuser(BasePermission):
     """
@@ -29,7 +30,8 @@ class IsSuperuser(BasePermission):
     def has_permission(request: Request, view: 'Type[APIView]') -> bool:
         if request.user and request.user.is_superuser:
             return True
-        raise CustomPermissionDenied(detail='You must have superuser privileges to perform this action.')
+        raise PermissionDenied(
+            detail='You must have superuser privileges to perform this action.')
 
 
 class IsSameAccountOrIsSuperuser(BasePermission):
@@ -39,11 +41,10 @@ class IsSameAccountOrIsSuperuser(BasePermission):
     """
 
     def has_object_permission(self, request: Request, view: 'Type[APIView]', obj: 'Type[models.Model]') -> bool:
-
         if request.user.is_superuser or (isinstance(obj, Account) and request.user.is_authenticated and obj == request.user.account) or (request.user.is_authenticated and hasattr(obj, 'account') and obj.account == request.user.account):
             return True
-        
-        raise CustomPermissionDenied(detail='You do not have access to this resource as it is not associated with your account.')
+        raise PermissionDenied(
+            detail='You do not have access to this resource as it is not associated with your account.')
 
 
 class HasPermission(BasePermission):
@@ -56,12 +57,12 @@ class HasPermission(BasePermission):
 
     def has_permission(self, request: Request, view: 'Type[APIView]') -> bool:
         user = request.user
-        if not user or not user.is_authenticated:
-            return False
 
-        if any(permission.codename == self.permission_codename for permission in user.permissions):
+        if user and user.is_authenticated and any(permission.codename == self.permission_codename for permission in user.permissions):
             return True
-        
+
         permission = Permission.objects.get(codename=self.permission_codename)
 
-        raise CustomPermissionDenied(detail=f'Missing permission: "{permission.name}"')
+        raise PermissionDenied(
+            detail=f'You are missing required permission: "{permission.name}"'
+        )
