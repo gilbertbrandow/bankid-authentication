@@ -6,6 +6,7 @@ from .models import User, Account, Group, Permission
 from .serializers import UserSerializer, AccountSerializer, GroupSerializer, PermissionSerializer
 from .permissions import IsAuthenticated, IsSuperuser, IsSameAccountOrIsSuperuser, HasPermission
 from .jwt_authentication import CustomJWTAuthentication
+from .decorators import get_and_check_object_permissions
 
 
 class ObtainJWTToken(CustomAPIView):
@@ -45,33 +46,14 @@ class AccountList(CustomAPIView):
 class AccountDetail(CustomAPIView):
     permission_classes = [IsSameAccountOrIsSuperuser]
 
-    @staticmethod
-    def get_object(pk: int) -> Account | None:
-        try:
-            return Account.objects.get(pk=pk)
-        except Account.DoesNotExist:
-            return None
-
-    def get(self, request: Request, pk: int) -> Account:
-        account = self.get_object(pk)
-
-        if account is None:
-            return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        self.check_object_permissions(request, account)
-
-        serializer = AccountSerializer(account)
+    @get_and_check_object_permissions(Account)
+    def get(self, request: Request, account: Account) -> Response:
+        serializer = AccountSerializer(instance=account)
         return Response(serializer.data)
 
-    def put(self, request: Request, pk: int) -> Account:
-        account = self.get_object(pk)
-
-        if account is None:
-            return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        self.check_object_permissions(request, account)
-
-        serializer = AccountSerializer(account, data=request.data)
+    @get_and_check_object_permissions(Account)
+    def put(self, request: Request, account: Account) -> Response:
+        serializer = AccountSerializer(instance=account, data=request.data)
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -79,16 +61,13 @@ class AccountDetail(CustomAPIView):
         serializer.save()
         return Response(serializer.data)
 
-    def patch(self, request: Request, pk: int) -> Account:
-        account = self.get_object(pk)
-
-        if account is None:
-            return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        self.check_object_permissions(request, account)
-
+    @get_and_check_object_permissions(Account)
+    def patch(self, request: Request, account: Account) -> Response:
         serializer = AccountSerializer(
-            account, data=request.data, partial=True)
+            instance=account,
+            data=request.data,
+            partial=True
+        )
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -96,20 +75,14 @@ class AccountDetail(CustomAPIView):
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request: Request, pk: int) -> Account:
-        account = self.get_object(pk)
-
-        if account is None:
-            return Response({'detail': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        self.check_object_permissions(request, account)
-
+    @get_and_check_object_permissions(Account)
+    def delete(self, request: Request, account: Account) -> Response:
         account.delete()
         return Response({'success': 'Account deleted.'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class GroupList(CustomAPIView):
-    
+
     def get_permissions(self):
         permissions = [IsAuthenticated()]
 
@@ -139,13 +112,15 @@ class GroupList(CustomAPIView):
 class GroupDetail(CustomAPIView):
     def get_permissions(self):
         permissions = [IsSameAccountOrIsSuperuser()]
-        
+
         if self.request.method == 'GET':
             permissions.append(HasPermission(permission_codename='view_group'))
         elif self.request.method in ['PUT', 'PATCH']:
-            permissions.append(HasPermission(permission_codename='change_group'))
+            permissions.append(HasPermission(
+                permission_codename='change_group'))
         elif self.request.method == 'DELETE':
-            permissions.append(HasPermission(permission_codename='delete_group'))
+            permissions.append(HasPermission(
+                permission_codename='delete_group'))
 
         return permissions
 
