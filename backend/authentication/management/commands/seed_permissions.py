@@ -13,8 +13,8 @@ class Command(BaseCommand):
 
     def create_permissions(self) -> None:
         models_permissions = {
+            "account": ["change_account", "view_account"],
             "user": ["add_user", "change_user", "delete_user", "view_user"],
-            "account": ["add_account", "change_account", "delete_account", "view_account"],
             "group": ["add_group", "change_group", "delete_group", "view_group"],
         }
 
