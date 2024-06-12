@@ -4,6 +4,7 @@ Django settings for local environment.
 
 from pathlib import Path
 from project.settings import get_secret
+from typing import Dict, Tuple, List, Any, Union
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -11,16 +12,16 @@ SECRET_KEY = get_secret('SECRET_KEY', 'your_secret_key')
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: List[str] = []
 
-INSTALLED_APPS = [
+INSTALLED_APPS: List[str] = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'rest_framework',
     'authentication',
 ]
 
-REST_FRAMEWORK = {
+REST_FRAMEWORK: Dict[str, Union[Tuple[str, ...], str]] = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'authentication.jwt_authentication.CustomJWTAuthentication',
     ),
@@ -35,14 +36,14 @@ REST_FRAMEWORK = {
 
 from datetime import timedelta
 
-JWT_AUTH = {
+JWT_AUTH: Dict[str, Any] = {
     'JWT_SECRET_KEY': 'your_jwt_secret_key',
     'JWT_ALGORITHM': 'HS256',
     'JWT_EXPIRATION_DELTA': timedelta(days=1),
     'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=7),
 }
 
-MIDDLEWARE = [
+MIDDLEWARE: List[str] = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -90,9 +91,10 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 import logging
+import logging.config
 from django.utils.log import DEFAULT_LOGGING
 
-LOGGING = {
+LOGGING: Dict[str, Any] = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {

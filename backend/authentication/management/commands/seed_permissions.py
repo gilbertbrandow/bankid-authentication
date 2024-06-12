@@ -2,11 +2,12 @@
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
 from authentication.models import Permission
+from typing import Any
 
 class Command(BaseCommand):
     help = 'Seed the database with authentication permission data'
 
-    def handle(self, *args, **kwargs) -> None:
+    def handle(self, *args: Any, **kwargs: Any) -> None:
         self.stdout.write(self.style.SUCCESS('Seeding data...'))
         self.create_permissions()
         self.stdout.write(self.style.SUCCESS('Seeding complete.'))
