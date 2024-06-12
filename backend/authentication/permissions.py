@@ -18,8 +18,7 @@ class IsAuthenticated(BasePermission):
     def has_permission(request: Request, view: 'Type[APIView]') -> bool:
         if request.user and request.user.is_authenticated:
             return True
-        raise PermissionDenied(
-            detail='You must be signed in to perform this action.')
+        raise PermissionDenied(detail='You must be signed in to perform this action.')
 
 
 class IsSuperuser(BasePermission):
@@ -28,26 +27,31 @@ class IsSuperuser(BasePermission):
     """
     @staticmethod
     def has_permission(request: Request, view: 'Type[APIView]') -> bool:
-        if request.user and request.user.is_superuser:
+        if request.user.is_superuser:
             return True
-        raise PermissionDenied(
-            detail='You must have superuser privileges to perform this action.')
+        raise PermissionDenied(detail='You must have superuser privileges to perform this action.')
 
 
 class IsSameAccountOrIsSuperuser(BasePermission):
     """
-    Custom permission to allow access if the  the resource is connected to the same account as the user 
+    Custom permission to allow access if the resource is connected to the same account as the user
     or the user is a superuser.
     """
 
     def has_object_permission(self, request: Request, view: 'Type[APIView]', obj: 'Type[models.Model]') -> bool:
-        if request.user.is_superuser or (isinstance(obj, Account) and request.user.is_authenticated and obj == request.user.account) or (request.user.is_authenticated and hasattr(obj, 'account') and obj.account == request.user.account):
+        user = request.user
+        if user.is_superuser:
             return True
-        raise PermissionDenied(
-            detail='You do not have access to this resource as it is not associated with your account.')
+        if user.is_authenticated and isinstance(obj, Account) and obj == user.account:
+            return True
+        if user.is_authenticated and not hasattr(obj, 'account'):
+            return True
+        if user.is_authenticated and hasattr(obj, 'account') and obj.account == user.account:
+            return True
+        raise PermissionDenied(detail='You do not have access to this resource as it is not associated with your account.')
 
 
-class HasPermission(BasePermission):
+class HasPermissionOrIsSuperuser(BasePermission):
     """
     Custom permission to allow access if the user has the specified permission.
     """
@@ -57,12 +61,11 @@ class HasPermission(BasePermission):
 
     def has_permission(self, request: Request, view: 'Type[APIView]') -> bool:
         user = request.user
-        
-        if user.is_superuser or (user and user.is_authenticated and any(permission.codename == self.permission_codename for permission in user.permissions)):
-            return True
-        
-        permission = Permission.objects.get(codename=self.permission_codename)
 
-        raise PermissionDenied(
-            detail=f'You are missing required permission: "{permission.name}"'
-        )
+        if user.is_superuser:
+            return True
+        if any(permission.codename == self.permission_codename for permission in user.permissions):
+            return True
+
+        permission = Permission.objects.get(codename=self.permission_codename)
+        raise PermissionDenied(detail=f'You are missing required permission: "{permission.name}"')

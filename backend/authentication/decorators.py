@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.request import Request
-from .permissions import HasPermission, IsSuperuser
+from .permissions import HasPermissionOrIsSuperuser, IsSuperuser
 from .views_base import CustomAPIView
 from typing import Callable, Type
 from rest_framework import status
@@ -25,7 +25,7 @@ def check_permission(permission_codename: str) -> Callable:
     def decorator(view_func: Callable) -> Callable:
         @wraps(view_func)
         def _wrapped_view(view: CustomAPIView, request: Request, *args, **kwargs) -> any:
-            permission_checker = HasPermission(permission_codename=permission_codename)
+            permission_checker = HasPermissionOrIsSuperuser(permission_codename=permission_codename)
             permission_checker.has_permission(request, view)
             return view_func(view, request, *args, **kwargs)
         return _wrapped_view
