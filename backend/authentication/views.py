@@ -6,7 +6,7 @@ from .models import User, Account, Group, Permission
 from .serializers import UserSerializer, AccountSerializer, GroupSerializer, PermissionSerializer
 from .permissions import IsAuthenticated, IsSuperuser, IsSameAccountOrIsSuperuser, HasPermission
 from .jwt_authentication import CustomJWTAuthentication
-from .decorators import get_and_check_object_permissions
+from .decorators import get_and_check_object_permissions, check_permission
 
 
 class ObtainJWTToken(CustomAPIView):
@@ -29,8 +29,8 @@ class AccountList(CustomAPIView):
 
     @staticmethod
     def get(request: Request) -> Response:
-        Accounts = Account.objects.all()
-        serializer = AccountSerializer(Accounts, many=True)
+        accounts = Account.objects.all()
+        serializer = AccountSerializer(accounts, many=True)
         return Response(serializer.data)
 
     @staticmethod
@@ -47,11 +47,13 @@ class AccountDetail(CustomAPIView):
     permission_classes = [IsSameAccountOrIsSuperuser]
 
     @get_and_check_object_permissions(Account)
+    @check_permission('view_account')
     def get(self, request: Request, account: Account) -> Response:
         serializer = AccountSerializer(instance=account)
         return Response(serializer.data)
 
     @get_and_check_object_permissions(Account)
+    @check_permission('change_account')
     def put(self, request: Request, account: Account) -> Response:
         serializer = AccountSerializer(instance=account, data=request.data)
 
@@ -62,6 +64,7 @@ class AccountDetail(CustomAPIView):
         return Response(serializer.data)
 
     @get_and_check_object_permissions(Account)
+    @check_permission('change_account')
     def patch(self, request: Request, account: Account) -> Response:
         serializer = AccountSerializer(
             instance=account,
