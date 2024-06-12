@@ -6,7 +6,7 @@ from .models import User, Account, Group, Permission
 from .serializers import UserSerializer, AccountSerializer, GroupSerializer, PermissionSerializer
 from .permissions import IsAuthenticated, IsSuperuser, IsSameAccountOrIsSuperuser
 from .jwt_authentication import CustomJWTAuthentication
-from .decorators import get_and_check_object_permissions, check_permission, superuser_permission
+from .decorators import get_and_check_object_permissions, check_permission, check_superuser_permission
 
 
 class ObtainJWTToken(CustomAPIView):
@@ -78,7 +78,7 @@ class AccountDetail(CustomAPIView):
         serializer.save()
         return Response(serializer.data)
 
-    @superuser_permission()
+    @check_superuser_permission()
     @get_and_check_object_permissions(Account)
     def delete(self, request: Request, account: Account) -> Response:
         account.delete()
@@ -211,7 +211,7 @@ class PermissionList(CustomAPIView):
         serializer = PermissionSerializer(Permissions, many=True)
         return Response(serializer.data)
 
-    @superuser_permission()
+    @check_superuser_permission()
     def post(request: Request) -> Response:
         serializer = PermissionSerializer(data=request.data)
         if not serializer.is_valid():
@@ -232,7 +232,7 @@ class PermissionDetail(CustomAPIView):
         return Response(serializer.data)
 
     @get_and_check_object_permissions(Permission)
-    @superuser_permission()
+    @check_superuser_permission()
     def put(self, request: Request, permission: Permission) -> Response:
         serializer = PermissionSerializer(permission, data=request.data)
 
@@ -243,7 +243,7 @@ class PermissionDetail(CustomAPIView):
         return Response(serializer.data)
 
     @get_and_check_object_permissions(Permission)
-    @superuser_permission()
+    @check_superuser_permission()
     def patch(self, request: Request, permission: Permission) -> Response:
         serializer = PermissionSerializer(
             permission, data=request.data, partial=True)
@@ -255,7 +255,7 @@ class PermissionDetail(CustomAPIView):
         return Response(serializer.data)
 
     @get_and_check_object_permissions(Permission)
-    @superuser_permission()
+    @check_superuser_permission()
     def delete(self, request: Request, permission: Permission) -> Permission:
         permission.delete()
         return Response({'success': 'Permission deleted.'}, status=status.HTTP_204_NO_CONTENT)
