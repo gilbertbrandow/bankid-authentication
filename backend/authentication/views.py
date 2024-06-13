@@ -96,7 +96,9 @@ class GroupList(CustomAPIView):
 
     @check_permission(permission_codename="add_group")
     def post(self, request: Request) -> Response:
-        serializer = GroupSerializer(data=request.data)
+        serializer = GroupSerializer(
+            data=request.data,
+            context={'request': request})
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -117,7 +119,10 @@ class GroupDetail(CustomAPIView):
     @get_and_check_object_permissions(model=Group)
     @check_permission(permission_codename="change_group")
     def put(self, request: Request, group: Group) -> Response:
-        serializer = GroupSerializer(group, data=request.data)
+        serializer = GroupSerializer(
+            instance=group,
+            data=request.data,
+            context={'request': request})
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -128,7 +133,11 @@ class GroupDetail(CustomAPIView):
     @get_and_check_object_permissions(model=Group)
     @check_permission(permission_codename="change_group")
     def patch(self, request: Request, group: Group) -> Response:
-        serializer = GroupSerializer(group, data=request.data, partial=True)
+        serializer = GroupSerializer(
+            instance=group,
+            data=request.data,
+            partial=True,
+            context={'request': request})
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -154,7 +163,9 @@ class UserList(CustomAPIView):
 
     @check_permission(permission_codename="add_user")
     def post(self, request: Request) -> Response:
-        serializer = UserSerializer(data=request.data)
+        serializer = UserSerializer(
+            data=request.data,
+            context={'request': request})
 
         if serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -175,7 +186,10 @@ class UserDetail(CustomAPIView):
     @get_and_check_object_permissions(model=User)
     @check_permission(permission_codename="change_user")
     def put(self, request: Request, user: User) -> Response:
-        serializer = UserSerializer(instance=user, data=request.data)
+        serializer = UserSerializer(
+            instance=user,
+            data=request.data,
+            context={'request': request})
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -187,7 +201,10 @@ class UserDetail(CustomAPIView):
     @check_permission(permission_codename="change_user")
     def patch(self, request: Request, user: User) -> Response:
         serializer = UserSerializer(
-            instance=user, data=request.data, partial=True)
+            instance=user,
+            data=request.data,
+            partial=True,
+            context={'request': request})
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
