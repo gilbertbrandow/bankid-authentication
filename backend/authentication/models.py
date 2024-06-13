@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
-from typing import Any
+from typing import Any, Optional, Union, Set
 
 
 class AccountManager(models.Manager):
@@ -55,11 +55,9 @@ class Permission(models.Model):
     def __str__(self) -> str:
         return str({"content_type": "permission", "id": self.id, "name": self.name})
 
-    pass
-
 
 class UserManager(models.Manager):
-    def create_user(self, email: str | None, password: str | None = None, **extra_fields: Any) -> 'User':
+    def create_user(self, email: Optional[str], password: Optional[str] = None, **extra_fields: Any) -> 'User':
         if not email:
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
@@ -69,11 +67,11 @@ class UserManager(models.Manager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email:str|None, password:str|None=None, **extra_fields: Any) -> 'User':
+    def create_superuser(self, email: Optional[str], password: Optional[str] = None, **extra_fields: Any) -> 'User':
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
 
-    def authenticate(self, email:str|None, password:str|None) -> 'User' | None:
+    def authenticate(self, email: Optional[str], password: Optional[str]) -> Optional['User']:
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -102,7 +100,7 @@ class User(models.Model):
     is_authenticated = True
 
     @property
-    def permissions(self) -> set[Permission]:
+    def permissions(self) -> Set[Permission]:
         user_permissions = set(self.user_permissions.all())
 
         group_permissions = set()
@@ -114,14 +112,14 @@ class User(models.Model):
     def get_account(self) -> Account:
         return self.account
 
-    def set_password(self, raw_password:str) -> 'User':
+    def set_password(self, raw_password: str) -> 'User':
         self.password = self.hash_password(raw_password)
         return self
 
-    def check_password(self, raw_password:str) -> bool:
+    def check_password(self, raw_password: str) -> bool:
         return bcrypt.checkpw(raw_password.encode('utf-8'), self.password.encode('utf-8'))
 
-    def hash_password(self, raw_password:str) -> str:
+    def hash_password(self, raw_password: str) -> str:
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(raw_password.encode('utf-8'), salt)
         return hashed_password.decode('utf-8')
@@ -152,13 +150,13 @@ class CustomAnonymousUser:
 
 
 class GroupManager(models.Manager):
-    def create_Group(self, name: str, **extra_fields: Any) -> 'Group':
+    def create_group(self, name: str, **extra_fields: Any) -> 'Group':
         if not name:
             raise ValueError('The name field must be set')
         name = name.strip()
-        Group = self.model(name=name, **extra_fields)
-        Group.save(using=self._db)
-        return Group
+        group = self.model(name=name, **extra_fields)
+        group.save(using=self._db)
+        return group
 
 
 class Group(models.Model):
