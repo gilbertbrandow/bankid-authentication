@@ -29,6 +29,28 @@ class Account(models.Model):
         return str({"content_type": "account", "id": self.id, "name": self.name})
 
 
+class BankIDAuthManager(models.Manager):
+    def get_active(self, order_ref: str) -> 'BankIDAuthentication' | None:
+        try:
+            return self.get(order_ref=order_ref, is_active=True)
+        except self.model.DoesNotExist:
+            return None
+
+
+class BankIDAuthentication(models.Model):
+    order_ref = models.CharField(max_length=255, unique=True, primary_key=True)
+    auto_start_token = models.CharField(max_length=255)
+    qr_start_token = models.CharField(max_length=255)
+    qr_start_secret = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'bankid_authentication'
+        
+    def __str__(self) -> str:
+        return self.order_ref
+
 class PermissionManager(models.Manager):
     def create_permission(self, name: str, **extra_fields: Any) -> 'Permission':
         if not name:
