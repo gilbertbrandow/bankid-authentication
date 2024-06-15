@@ -4,7 +4,7 @@ URL configuration for authentication.
 """
 
 from django.urls import path
-from .views import AccountList, AccountDetail, GroupList, GroupDetail, UserList, UserDetail, PermissionList, PermissionDetail, ObtainJWTToken
+from .views import AccountList, AccountDetail, GroupList, GroupDetail, UserList, UserDetail, PermissionList, PermissionDetail, ObtainJWTToken, bankid_initiate_authentication
 
 urlpatterns = [
     path('token/', ObtainJWTToken.as_view(), name='token_obtain'),
@@ -18,4 +18,8 @@ urlpatterns = [
     path('users/<int:pk>/', UserDetail.as_view(), name='user_detail'),
     path('permissions/', PermissionList.as_view(), name='permission_list'),
     path('permissions/<int:pk>/', PermissionDetail.as_view(), name='permission_detail'),
+    
+    # BankID authentication
+    path('bankid/initiate/', bankid_initiate_authentication, name='bankid_initiate'),
+
 ]
