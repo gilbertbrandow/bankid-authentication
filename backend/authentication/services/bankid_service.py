@@ -1,9 +1,16 @@
+import io
+import hmac
+import time
+import qrcode
+import hashlib
 import requests
 from requests.models import Response
 from django.core.cache import cache
 from django.conf import settings
 from authentication.models import BankIDAuthentication
 from typing import Dict, Union
+from django.core.exceptions import ObjectDoesNotExist
+from authentication.models import BankIDAuthentication
 
 
 
@@ -41,9 +48,35 @@ class BankIDService():
                 qr_start_secret=response_data['qrStartSecret'],
                 is_active=True
             )
-
             return auth.order_ref
         except requests.RequestException as e:
             raise
         except Exception as e:
             raise
+    
+    def generate_qr_code_data(self, order_ref: str) -> str:
+        try:
+            auth = BankIDAuthentication.objects.get(order_ref=order_ref, is_active=True)
+            
+            qr_start_token = auth.qr_start_token
+            qr_start_secret = auth.qr_start_secret
+
+            current_time = int(time.time() // 1)
+            qr_auth_code = hmac.new(
+                key=qr_start_secret.encode(),
+                msg=str(current_time).encode(),
+                digestmod=hashlib.sha256
+            ).hexdigest()
+
+            qr_data = f"{qr_start_token}.{current_time}.{qr_auth_code}"
+            return qr_data
+        except ObjectDoesNotExist:
+            raise ValueError("Invalid order reference or the authentication is not active.")
+        except Exception as e:
+            raise
+
+    def generate_qr_code_image(self, qr_data: str) -> bytes:
+        qr_img = qrcode.make(qr_data)
+        with io.BytesIO() as buffer:
+            qr_img.save(buffer)
+            return buffer.getvalue()
