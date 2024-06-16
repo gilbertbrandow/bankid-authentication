@@ -4,6 +4,7 @@ import time
 import qrcode
 import hashlib
 import requests
+import datetime
 from requests.models import Response
 from django.core.cache import cache
 from django.conf import settings
@@ -57,6 +58,11 @@ class BankIDService():
     def generate_qr_code_data(self, order_ref: str) -> str:
         try:
             auth = BankIDAuthentication.objects.get(order_ref=order_ref, is_active=True)
+            
+            if (datetime.datetime.now(datetime.timezone.utc) - auth.created_at).total_seconds() > 30:
+                auth.is_active = False
+                auth.save()
+                raise ValueError("The BankID authentication session has expired.")
             
             qr_start_token = auth.qr_start_token
             qr_start_secret = auth.qr_start_secret

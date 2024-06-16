@@ -25,11 +25,9 @@ def bankid_initiate_authentication(request: Request) -> Response:
         order_ref = bankid_service.initiate_authentication(end_user_ip=request.META.get('REMOTE_ADDR'))
         return Response({'orderRef': order_ref}, status=status.HTTP_200_OK)
     except requests.RequestException as e:
-        error_message = f"Failed to initiate BankID authentication: {str(e)}"
-        return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail':  f"Failed to initiate BankID authentication: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        error_message = f"An unexpected error occurred: {str(e)}"
-        return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'detail': f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @csrf_exempt
 @api_view(['GET'])
@@ -41,11 +39,11 @@ def generate_qr_code(request: Request, order_ref: str) -> HttpResponse:
         qr_image = bankid_service.generate_qr_code_image(qr_data=qr_data)
         return HttpResponse(qr_image, content_type="image/png")
     except ValueError as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except ObjectDoesNotExist:
-        return Response({'error': 'Authentication not found or inactive.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Authentication not found or inactive.'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        return Response({'error': f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'detail': f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ObtainJWTToken(CustomAPIView):
     permission_classes: list = []
