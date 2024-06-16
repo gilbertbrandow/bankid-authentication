@@ -12,6 +12,9 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from authentication.services.bankid_service import BankIDService
+from django.http import HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
+
         
 @csrf_exempt
 @api_view(['POST'])
@@ -28,6 +31,21 @@ def bankid_initiate_authentication(request: Request) -> Response:
         error_message = f"An unexpected error occurred: {str(e)}"
         return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def generate_qr_code(request: Request, order_ref: str) -> HttpResponse:
+    bankid_service = BankIDService()
+    try:
+        qr_data = bankid_service.generate_qr_code_data(order_ref=order_ref)
+        qr_image = bankid_service.generate_qr_code_image(qr_data=qr_data)
+        return HttpResponse(qr_image, content_type="image/png")
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except ObjectDoesNotExist:
+        return Response({'error': 'Authentication not found or inactive.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ObtainJWTToken(CustomAPIView):
     permission_classes: list = []
