@@ -45,6 +45,21 @@ def generate_qr_code(request: Request, order_ref: str) -> HttpResponse:
     except Exception as e:
         return Response({'detail': f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def poll_authentication_status(request: Request, order_ref: str) -> Response:
+    bankid_service = BankIDService()
+    try:
+        auth_status = bankid_service.poll_authentication_status(order_ref)
+        return Response(auth_status, status=status.HTTP_200_OK)
+    except requests.RequestException as e:
+        error_message = f"Failed to poll BankID authentication status: {str(e)}"
+        return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        error_message = f"An unexpected error occurred: {str(e)}"
+        return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class ObtainJWTToken(CustomAPIView):
     permission_classes: list = []
 
