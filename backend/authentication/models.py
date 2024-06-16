@@ -30,7 +30,7 @@ class Account(models.Model):
 
 
 class BankIDAuthManager(models.Manager):
-    def get_active(self, order_ref: str) -> 'BankIDAuthentication' | None:
+    def get_active(self, order_ref: str) -> Optional['BankIDAuthentication']:
         try:
             return self.get(order_ref=order_ref, is_active=True)
         except self.model.DoesNotExist:
@@ -46,7 +46,7 @@ class BankIDAuthentication(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'bankid_authentication'
+        db_table = 'authentication_bankid'
         
     def __str__(self) -> str:
         return self.order_ref
