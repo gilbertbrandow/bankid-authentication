@@ -14,11 +14,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from authentication.models import BankIDAuthentication
 
 
-
 class BankIDService():
     def __init__(self) -> None:
         self.bankid_url = settings.BANKID['endpoint']
-        self.cert = (settings.BANKID['cert_path'], settings.BANKID['cert_key_path'])
+        self.cert = (settings.BANKID['cert_path'],
+                     settings.BANKID['cert_key_path'])
         self.verify = settings.BANKID['ca_cert_path']
 
     def _request(self, path: str, payload: Dict[str, Union[str, bool, object]]) -> Response:
@@ -54,16 +54,18 @@ class BankIDService():
             raise
         except Exception as e:
             raise
-    
+
     def generate_qr_code_data(self, order_ref: str) -> str:
         try:
-            auth = BankIDAuthentication.objects.get(order_ref=order_ref, is_active=True)
-            
+            auth = BankIDAuthentication.objects.get(
+                order_ref=order_ref, is_active=True)
+
             if (datetime.datetime.now(datetime.timezone.utc) - auth.created_at).total_seconds() > 30:
                 auth.is_active = False
                 auth.save()
-                raise ValueError("The BankID authentication session has expired.")
-            
+                raise ValueError(
+                    "The BankID authentication session has expired.")
+
             qr_start_token = auth.qr_start_token
             qr_start_secret = auth.qr_start_secret
 
@@ -77,7 +79,8 @@ class BankIDService():
             qr_data = f"{qr_start_token}.{current_time}.{qr_auth_code}"
             return qr_data
         except ObjectDoesNotExist:
-            raise ValueError("Invalid order reference or the authentication is not active.")
+            raise ValueError(
+                "Invalid order reference or the authentication is not active.")
         except Exception as e:
             raise
 
@@ -86,7 +89,7 @@ class BankIDService():
         with io.BytesIO() as buffer:
             qr_img.save(buffer)
             return buffer.getvalue()
-    
+
     def poll_authentication_status(self, order_ref: str) -> Dict[str, Union[str, bool]]:
         try:
             response: Response = self._request(path='/rp/v6.0/collect', payload={
@@ -100,12 +103,25 @@ class BankIDService():
             hint_code = response_data.get('hintCode')
 
             if status == 'complete' or status == 'failed':
-                BankIDAuthentication.objects.filter(order_ref=order_ref).update(is_active=False)
-            
+                BankIDAuthentication.objects.filter(
+                    order_ref=order_ref).update(is_active=False)
+
             return {
                 'status': status,
                 'hint_code': hint_code
             }
+        except requests.RequestException as e:
+            raise
+        except Exception as e:
+            raise
+
+    def cancel_authentication(self, order_ref: str) -> None:
+        try:
+            response: Response = self._request(path='/rp/v6.0/cancel', payload={
+                'orderRef': order_ref
+            })
+            response.raise_for_status()
+            return None
         except requests.RequestException as e:
             raise
         except Exception as e:
