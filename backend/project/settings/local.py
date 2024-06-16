@@ -2,6 +2,10 @@
 Django settings for local environment.
 """
 
+from django.utils.log import DEFAULT_LOGGING
+import logging.config
+import logging
+from datetime import timedelta
 from pathlib import Path
 from project.settings import get_secret
 from typing import Dict, Tuple, List, Any, Union
@@ -34,7 +38,6 @@ REST_FRAMEWORK: Dict[str, Union[Tuple[str, ...], str]] = {
     'UNAUTHENTICATED_USER': 'authentication.models.CustomAnonymousUser',
 }
 
-from datetime import timedelta
 
 JWT_AUTH: Dict[str, Any] = {
     'JWT_SECRET_KEY': 'your_jwt_secret_key',
@@ -90,9 +93,13 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-import logging
-import logging.config
-from django.utils.log import DEFAULT_LOGGING
+
+BANKID: Dict[str, str | None] = {
+    "endpoint": get_secret('BANKID_ENDPOINT'),
+    "ca_cert_path": get_secret('BANKID_CA_CERT'),
+    "cert_path": get_secret('BANKID_CERT_PEM_PATH'),
+    "cert_key_path": get_secret('BANKID_CERT_PEM_KEY_PATH'),
+}
 
 LOGGING: Dict[str, Any] = {
     'version': 1,
