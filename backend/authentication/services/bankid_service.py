@@ -86,3 +86,27 @@ class BankIDService():
         with io.BytesIO() as buffer:
             qr_img.save(buffer)
             return buffer.getvalue()
+    
+    def poll_authentication_status(self, order_ref: str) -> Dict[str, Union[str, bool]]:
+        try:
+            response: Response = self._request(path='/rp/v6.0/collect', payload={
+                'orderRef': order_ref
+            })
+
+            response.raise_for_status()
+            response_data = response.json()
+
+            status = response_data.get('status')
+            hint_code = response_data.get('hintCode')
+
+            if status == 'complete' or status == 'failed':
+                BankIDAuthentication.objects.filter(order_ref=order_ref).update(is_active=False)
+            
+            return {
+                'status': status,
+                'hint_code': hint_code
+            }
+        except requests.RequestException as e:
+            raise
+        except Exception as e:
+            raise
