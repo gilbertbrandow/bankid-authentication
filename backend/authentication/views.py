@@ -60,6 +60,21 @@ def poll_authentication_status(request: Request, order_ref: str) -> Response:
         error_message = f"An unexpected error occurred: {str(e)}"
         return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@csrf_exempt
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+def cancel_authentication(request: Request, order_ref: str) -> Response:
+    bankid_service = BankIDService()
+    try:
+        bankid_service.cancel_authentication(order_ref=order_ref)
+        return Response({'success': 'BankID authentication cancelled.'}, status=status.HTTP_204_NO_CONTENT)
+    except requests.RequestException as e:
+        error_message = f"Failed to poll BankID authentication status: {str(e)}"
+        return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        error_message = f"An unexpected error occurred: {str(e)}"
+        return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class ObtainJWTToken(CustomAPIView):
     permission_classes: list = []
 

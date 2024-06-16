@@ -4,7 +4,7 @@ URL configuration for authentication.
 """
 
 from django.urls import path
-from .views import AccountList, AccountDetail, GroupList, GroupDetail, UserList, UserDetail, PermissionList, PermissionDetail, ObtainJWTToken, bankid_initiate_authentication, generate_qr_code, poll_authentication_status
+from .views import AccountList, AccountDetail, GroupList, GroupDetail, UserList, UserDetail, PermissionList, PermissionDetail, ObtainJWTToken, bankid_initiate_authentication, generate_qr_code, poll_authentication_status, cancel_authentication
 
 urlpatterns = [
     path('token/', ObtainJWTToken.as_view(), name='token_obtain'),
@@ -23,4 +23,5 @@ urlpatterns = [
     path('bankid/initiate/', bankid_initiate_authentication, name='bankid_initiate'),
     path('bankid/qr/<str:order_ref>/', generate_qr_code, name='bankid_qr_code'),
     path('bankid/poll/<str:order_ref>/', poll_authentication_status, name='bankid_poll'),
+    path('bankid/cancel/<str:order_ref>/', cancel_authentication, name='bankid_cancel'),
 ]
