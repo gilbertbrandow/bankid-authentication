@@ -1,3 +1,4 @@
+import requests
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -8,37 +9,25 @@ from .permissions import IsAuthenticated, IsSuperuser, IsSameAccountOrIsSuperuse
 from .jwt_authentication import CustomJWTAuthentication
 from .decorators import get_and_check_object_permissions, check_permission, check_superuser_permission
 from django.views.decorators.csrf import csrf_exempt
-import requests
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
-
-
+from authentication.services.bankid_service import BankIDService
+        
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def bankid_initiate_authentication(request: Request) -> Response:
-    end_user_ip = request.META.get('REMOTE_ADDR')
-    payload = {
-        'endUserIp': end_user_ip,
-        'returnUrl': "https://bankid.com/auth/login_page#nonce=a3618c72-bc71-4002-b3de-509555b175db",
-        'returnRisk': True,
-        'requirement': {
-            'risk': 'low'
-        },
-    }
-
+    bankid_service = BankIDService()
     try:
-        response = requests.post(
-            'https://appapi2.test.bankid.com/rp/v6.0/auth',
-            json=payload,
-            cert=("authentication/certificates/tests/FPTestcert4_20230629.pem", "authentication/certificates/tests/decrypted_key.pem"),
-            verify="authentication/certificates/tests/ca_cert.pem"
-        )
-        response.raise_for_status()
-        return Response(response.json())
+        order_ref = bankid_service.initiate_authentication(end_user_ip=request.META.get('REMOTE_ADDR'))
+        return Response({'orderRef': order_ref}, status=status.HTTP_200_OK)
     except requests.RequestException as e:
-        error_message = f"Error: {str(e)}, Response: {e.response.text if e.response else 'No response'}"
-        return Response({'error': error_message}, status=400)
+        error_message = f"Failed to initiate BankID authentication: {str(e)}"
+        return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        error_message = f"An unexpected error occurred: {str(e)}"
+        return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class ObtainJWTToken(CustomAPIView):
     permission_classes: list = []
