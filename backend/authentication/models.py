@@ -30,11 +30,7 @@ class Account(models.Model):
 
 
 class BankIDAuthManager(models.Manager):
-    def get_active(self, order_ref: str) -> Optional['BankIDAuthentication']:
-        try:
-            return self.get(order_ref=order_ref, is_active=True)
-        except self.model.DoesNotExist:
-            return None
+    pass
 
 
 class BankIDAuthentication(models.Model):
@@ -42,7 +38,6 @@ class BankIDAuthentication(models.Model):
     auto_start_token = models.CharField(max_length=255)
     qr_start_token = models.CharField(max_length=255)
     qr_start_secret = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

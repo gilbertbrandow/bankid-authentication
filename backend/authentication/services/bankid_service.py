@@ -22,20 +22,38 @@ class BankIDService():
         3: _("Action cancelled. Please try again."),
         4: _("An identification or signing for this personal number is already started. Please try again."),
         5: _("Internal error. Please try again."),
+        6: _("Action cancelled."),
+        8: _("The BankID app is not responding. Please check that it’s started and that you have internet access. If you don’t have a valid BankID you can get one from your bank. Try again."),
+        9: _("Enter your security code in the BankID app and select Identify or Sign."),
         13: _("Trying to start your BankID app."),
         15: _("Searching for BankID, it may take a little while … If a few seconds have passed and still no BankID has been found, you probably don’t have a BankID which can be used for this identification/signing on this device. If you don't have a BankID you can get one from your bank."),
+        16: _("The BankID you are trying to use is blocked or too old. Please use another BankID or get a new one from your bank."),
+        17: _("Failed to scan the QR code. Start the BankID app and scan the QR code. Check that the BankID app is up to date. If you don't have the BankID app, you need to install it and get a BankID from your bank. Install the app from your app store or https://install.bankid.com"),
+        18: _("Start the BankID app."),
         19: _("Would you like to identify yourself or sign with a BankID on this computer, or with a Mobile BankID?"),
-        21: _("An unknown error occurred. Please try again."),
+        21: _("Identification or signing in progress."),
+        22: _("Unknown error. Please try again."),
+        23: _("Process your machine-readable travel document using the BankID app.")
     }
 
     HINT_CODE_TO_RFA: dict[str, int] = {
         'outstandingTransaction': 1,
         'noClient': 1,
-        'started': 15,
+        'cancelled': 3, 
+        'userCancel': 6,
+        'expiredTransaction': 8,
         'userSign': 9,
+        'started': 15,
+        'certificateErr': 16,
+        'startFailed': 17,
         'userMrtd': 23,
         'userCallConfirm': 23,
-        'unknown': 21
+    }
+    
+    DEFAULT_HINT_CODES: dict[str, int] = {
+        'pending': 21, 
+        'failed': 22,
+        'success': 21,
     }
 
     def __init__(self) -> None:
@@ -52,6 +70,12 @@ class BankIDService():
             verify=self.verify
         )
 
+    def get_rfa_message(self, index: int) -> str:
+        return self.RFA[index]
+    
+    def get_default_rfa_message(self, status: str) -> str:
+        return self.get_rfa_message(self.DEFAULT_HINT_CODES[status])
+    
     def initiate_authentication(self, end_user_ip: str) -> str:
         try:
             response: Response = self._request(path='/rp/v6.0/auth', payload={
@@ -69,8 +93,7 @@ class BankIDService():
                 order_ref=response_data['orderRef'],
                 auto_start_token=response_data['autoStartToken'],
                 qr_start_token=response_data['qrStartToken'],
-                qr_start_secret=response_data['qrStartSecret'],
-                is_active=True
+                qr_start_secret=response_data['qrStartSecret']
             )
             return auth.order_ref
         except requests.RequestException as e:
@@ -81,13 +104,12 @@ class BankIDService():
     def generate_qr_code_data(self, order_ref: str) -> str:
         try:
             auth = BankIDAuthentication.objects.get(
-                order_ref=order_ref, is_active=True)
+                order_ref=order_ref)
 
             if (datetime.datetime.now(datetime.timezone.utc) - auth.created_at).total_seconds() > 30:
-                auth.is_active = False
-                auth.save()
+                auth.delete()
                 raise ValueError(
-                    "The BankID authentication session has expired.")
+                    _("The BankID authentication session has expired."))
 
             qr_start_token = auth.qr_start_token
             qr_start_secret = auth.qr_start_secret
@@ -99,11 +121,10 @@ class BankIDService():
                 digestmod=hashlib.sha256
             ).hexdigest()
 
-            qr_data = f"{qr_start_token}.{current_time}.{qr_auth_code}"
-            return qr_data
+            return f"{qr_start_token}.{current_time}.{qr_auth_code}"
         except ObjectDoesNotExist:
             raise ValueError(
-                "Invalid order reference or the authentication is not active.")
+                _("Invalid order reference or the authentication is not active."))
         except Exception as e:
             raise
 
@@ -113,7 +134,7 @@ class BankIDService():
             qr_img.save(buffer)
             return buffer.getvalue()
 
-    def poll_authentication_status(self, order_ref: str) -> Dict[str, Union[str, bool]]:
+    def poll_authentication_status(self, order_ref: str) -> Dict[str, str]:
         try:
             response: Response = self._request(path='/rp/v6.0/collect', payload={
                 'orderRef': order_ref
@@ -124,13 +145,14 @@ class BankIDService():
 
             status: str = response_data.get('status')
             hint_code: str = response_data.get('hintCode')
-            message: str = self.RFA[self.HINT_CODE_TO_RFA.get(hint_code, 21)]
+            message: str = self.RFA[self.HINT_CODE_TO_RFA.get(hint_code, self.DEFAULT_HINT_CODES[status])]
             
             if status == 'complete' or status == 'failed':
-                BankIDAuthentication.objects.filter(order_ref=order_ref).update(is_active=False)
+                BankIDAuthentication.objects.get(order_ref=order_ref).delete()
 
             return {
                 'status': status,
+                'hint_code': hint_code,
                 'message': message
             }
         except requests.RequestException as e:
@@ -140,11 +162,21 @@ class BankIDService():
 
     def cancel_authentication(self, order_ref: str) -> None:
         try:
+            auth = BankIDAuthentication.objects.get(
+                order_ref=order_ref)
+             
             response: Response = self._request(path='/rp/v6.0/cancel', payload={
                 'orderRef': order_ref
             })
+            
             response.raise_for_status()
+            
+            auth.delete()
+            
             return None
+        except ObjectDoesNotExist:
+            raise ValueError(
+                _("Invalid order reference or the authentication is not active."))
         except requests.RequestException as e:
             raise
         except Exception as e:
