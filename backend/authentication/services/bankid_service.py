@@ -7,6 +7,7 @@ import requests
 import datetime
 from requests.models import Response
 from django.core.cache import cache
+from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from authentication.models import BankIDAuthentication
 from typing import Dict, Union
@@ -15,6 +16,28 @@ from authentication.models import BankIDAuthentication
 
 
 class BankIDService():
+    RFA: dict[int, str] = {
+        1: _("Please start the BankID app."),
+        2: _("The BankID app is not installed. Please contact your bank."),
+        3: _("Action cancelled. Please try again."),
+        4: _("An identification or signing for this personal number is already started. Please try again."),
+        5: _("Internal error. Please try again."),
+        13: _("Trying to start your BankID app."),
+        15: _("Searching for BankID, it may take a little while … If a few seconds have passed and still no BankID has been found, you probably don’t have a BankID which can be used for this identification/signing on this device. If you don't have a BankID you can get one from your bank."),
+        19: _("Would you like to identify yourself or sign with a BankID on this computer, or with a Mobile BankID?"),
+        21: _("An unknown error occurred. Please try again."),
+    }
+
+    HINT_CODE_TO_RFA: dict[str, int] = {
+        'outstandingTransaction': 1,
+        'noClient': 1,
+        'started': 15,
+        'userSign': 9,
+        'userMrtd': 23,
+        'userCallConfirm': 23,
+        'unknown': 21
+    }
+
     def __init__(self) -> None:
         self.bankid_url = settings.BANKID['endpoint']
         self.cert = (settings.BANKID['cert_path'],
@@ -99,16 +122,16 @@ class BankIDService():
             response.raise_for_status()
             response_data = response.json()
 
-            status = response_data.get('status')
-            hint_code = response_data.get('hintCode')
-
+            status: str = response_data.get('status')
+            hint_code: str = response_data.get('hintCode')
+            message: str = self.RFA[self.HINT_CODE_TO_RFA.get(hint_code, 21)]
+            
             if status == 'complete' or status == 'failed':
-                BankIDAuthentication.objects.filter(
-                    order_ref=order_ref).update(is_active=False)
+                BankIDAuthentication.objects.filter(order_ref=order_ref).update(is_active=False)
 
             return {
                 'status': status,
-                'hint_code': hint_code
+                'message': message
             }
         except requests.RequestException as e:
             raise

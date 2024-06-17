@@ -2,7 +2,6 @@ import requests
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
-from .views_base import CustomAPIView
 from .models import User
 from .jwt_authentication import CustomJWTAuthentication
 from django.views.decorators.csrf import csrf_exempt
