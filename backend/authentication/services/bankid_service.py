@@ -95,6 +95,9 @@ class BankIDService():
                 qr_start_token=response_data['qrStartToken'],
                 qr_start_secret=response_data['qrStartSecret']
             )
+            
+            cache.set(auth.order_ref, auth, timeout=30)
+
             return auth.order_ref
         except requests.RequestException as e:
             raise
@@ -103,8 +106,11 @@ class BankIDService():
 
     def generate_qr_code_data(self, order_ref: str) -> str:
         try:
-            auth = BankIDAuthentication.objects.get(
-                order_ref=order_ref)
+            auth: BankIDAuthentication = cache.get(order_ref)
+            
+            if not auth:
+                auth = BankIDAuthentication.objects.get(order_ref=order_ref)
+                cache.set(auth.order_ref, auth, timeout=300)
 
             if (datetime.datetime.now(datetime.timezone.utc) - auth.created_at).total_seconds() > 30:
                 auth.delete()
@@ -124,7 +130,7 @@ class BankIDService():
             return f"{qr_start_token}.{current_time}.{qr_auth_code}"
         except ObjectDoesNotExist:
             raise ValueError(
-                _("Invalid order reference or the authentication is not active."))
+                _("Invalid order reference."))
         except Exception as e:
             raise
 
@@ -170,8 +176,9 @@ class BankIDService():
             })
             
             response.raise_for_status()
-            
+
             auth.delete()
+            cache.delete(order_ref)
             
             return None
         except ObjectDoesNotExist:
