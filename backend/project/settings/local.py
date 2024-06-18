@@ -54,7 +54,7 @@ MIDDLEWARE: List[str] = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'project.urls'
+ROOT_URLCONF: str = 'project.urls'
 
 TEMPLATES = [
     {
@@ -70,9 +70,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'project.wsgi.application'
+WSGI_APPLICATION: str = 'project.wsgi.application'
 
-DATABASES = {
+DATABASES: Dict[str, Dict[str, str|None]] = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': get_secret("POSTGRES_NAME"),
@@ -83,16 +83,22 @@ DATABASES = {
     }
 }
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE: str = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE: str = 'UTC'
 
-USE_I18N = True
+USE_I18N: bool = True
 
-USE_TZ = True
+USE_TZ: bool = True
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD: str = 'django.db.models.BigAutoField'
 
+CACHES: Dict[str, dict[str, str]] = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+    }
+}
 
 BANKID: Dict[str, str | None] = {
     "endpoint": get_secret('BANKID_ENDPOINT'),
