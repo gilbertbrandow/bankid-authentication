@@ -58,8 +58,8 @@ def generate_qr_code(request: Request, order_ref: str) -> HttpResponse:
 def poll_authentication_status(request: Request, order_ref: str) -> Response:
     bankid_service = BankIDService()
     try:
-        auth_status = bankid_service.poll_authentication_status(order_ref)
-        return Response(auth_status, status=status.HTTP_200_OK)
+        auth = bankid_service.poll_authentication_status(order_ref)
+        return Response(auth, status=status.HTTP_200_OK)
     except requests.RequestException as e:
         error_message = f"Failed to poll BankID authentication status: {str(e)}"
         return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)

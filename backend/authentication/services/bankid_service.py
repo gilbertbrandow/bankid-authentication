@@ -140,7 +140,7 @@ class BankIDService():
             qr_img.save(buffer)
             return buffer.getvalue()
 
-    def poll_authentication_status(self, order_ref: str) -> Dict[str, str]:
+    def poll_authentication_status(self, order_ref: str) -> Dict[str, str|object]:
         try:
             response: Response = self._request(path='/rp/v6.0/collect', payload={
                 'orderRef': order_ref
@@ -150,11 +150,19 @@ class BankIDService():
             response_data = response.json()
 
             status: str = response_data.get('status')
+            
+            if status == 'complete':
+                BankIDAuthentication.objects.get(order_ref=order_ref).delete()
+                return {
+                    'status': status,
+                    'completion_data': response_data.get('completionData'),
+                }
+            elif status == 'failed':
+                BankIDAuthentication.objects.get(order_ref=order_ref).delete()
+
+            
             hint_code: str = response_data.get('hintCode')
             message: str = self.RFA[self.HINT_CODE_TO_RFA.get(hint_code, self.DEFAULT_HINT_CODES[status])]
-            
-            if status == 'complete' or status == 'failed':
-                BankIDAuthentication.objects.get(order_ref=order_ref).delete()
 
             return {
                 'status': status,
