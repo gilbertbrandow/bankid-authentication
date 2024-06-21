@@ -1,9 +1,11 @@
 import jwt
-from datetime import datetime
+import secrets
+from datetime import datetime, timedelta
 from django.conf import settings
+from django.utils import timezone
 from rest_framework.request import Request
 from rest_framework import authentication, exceptions
-from .models import User
+from .models import User, RefreshToken
 
 class CustomJWTAuthentication(authentication.BaseAuthentication):
     """
@@ -67,3 +69,38 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
             payload=payload, key=settings.JWT_AUTH['JWT_SECRET_KEY'], algorithm=settings.JWT_AUTH['JWT_ALGORITHM']
         )
         return token
+
+    @staticmethod
+    def generate_refresh_token(user: User) -> RefreshToken:
+        """
+        Generate a refresh token for the given user.
+
+        @param user: The user for whom the refresh token is being generated.
+        @return: A RefreshToken object.
+        """
+        refresh_token = RefreshToken.objects.create(
+            user=user,
+            token=secrets.token_urlsafe(64),
+            expires_at=timezone.now() + settings.JWT_AUTH['JWT_REFRESH_EXPIRATION_DELTA']
+        )
+        return refresh_token
+
+    @staticmethod
+    def refresh_access_token(refresh_token_str: str) -> str:
+        """
+        Refresh the access token using the provided refresh token.
+
+        @param refresh_token_str: The refresh token string.
+        @return: A new JWT access token.
+        @exception: Raises AuthenticationFailed if the refresh token is invalid or expired.
+        """
+        try:
+            refresh_token = RefreshToken.objects.get(token=refresh_token_str)
+            if refresh_token.is_expired():
+                raise exceptions.AuthenticationFailed('Refresh token has expired')
+            
+            # Generate new access token
+            access_token = CustomJWTAuthentication.generate_jwt(refresh_token.user)
+            return access_token
+        except RefreshToken.DoesNotExist:
+            raise exceptions.AuthenticationFailed('Invalid refresh token')
