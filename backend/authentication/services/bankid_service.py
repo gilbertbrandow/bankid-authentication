@@ -5,6 +5,7 @@ import qrcode
 import hashlib
 import requests
 import datetime
+from authentication.models import User
 from requests.models import Response
 from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
@@ -39,7 +40,7 @@ class BankIDService():
     HINT_CODE_TO_RFA: dict[str, int] = {
         'outstandingTransaction': 1,
         'noClient': 1,
-        'cancelled': 3, 
+        'cancelled': 3,
         'userCancel': 6,
         'expiredTransaction': 8,
         'userSign': 9,
@@ -49,9 +50,9 @@ class BankIDService():
         'userMrtd': 23,
         'userCallConfirm': 23,
     }
-    
+
     DEFAULT_HINT_CODES: dict[str, int] = {
-        'pending': 21, 
+        'pending': 21,
         'failed': 22,
         'success': 21,
     }
@@ -72,10 +73,10 @@ class BankIDService():
 
     def get_rfa_message(self, index: int) -> str:
         return self.RFA[index]
-    
+
     def get_default_rfa_message(self, status: str) -> str:
         return self.get_rfa_message(self.DEFAULT_HINT_CODES[status])
-    
+
     def initiate_authentication(self, end_user_ip: str) -> str:
         try:
             response: Response = self._request(path='/rp/v6.0/auth', payload={
@@ -95,7 +96,7 @@ class BankIDService():
                 qr_start_token=response_data['qrStartToken'],
                 qr_start_secret=response_data['qrStartSecret']
             )
-            
+
             cache.set(auth.order_ref, auth, timeout=30)
 
             return auth.order_ref
@@ -107,7 +108,7 @@ class BankIDService():
     def generate_qr_code_data(self, order_ref: str) -> str:
         try:
             auth: BankIDAuthentication = cache.get(order_ref)
-            
+
             if not auth:
                 auth = BankIDAuthentication.objects.get(order_ref=order_ref)
                 cache.set(auth.order_ref, auth, timeout=300)
@@ -140,7 +141,7 @@ class BankIDService():
             qr_img.save(buffer)
             return buffer.getvalue()
 
-    def poll_authentication_status(self, order_ref: str) -> Dict[str, str|object]:
+    def poll_authentication_status(self, order_ref: str) -> Dict[str, str | object]:
         try:
             response: Response = self._request(path='/rp/v6.0/collect', payload={
                 'orderRef': order_ref
@@ -150,19 +151,29 @@ class BankIDService():
             response_data = response.json()
 
             status: str = response_data.get('status')
-            
+
             if status == 'complete':
-                BankIDAuthentication.objects.get(order_ref=order_ref).delete()
-                return {
-                    'status': status,
-                    'completion_data': response_data.get('completionData'),
-                }
+                personal_number = response_data.get('completionData', {}).get(
+                    'user', {}).get('personalNumber')
+                if personal_number:
+                    try:
+                        user = User.objects.get(
+                            personal_number=personal_number)
+                        BankIDAuthentication.objects.get(
+                            order_ref=order_ref).delete()
+
+                    except User.DoesNotExist:
+                        raise ValueError(
+                            _('It does not seem you have an account associated with your personal number.'))
+                else:
+                    raise ValueError(
+                        'Personal number not found in completion data')
             elif status == 'failed':
                 BankIDAuthentication.objects.get(order_ref=order_ref).delete()
 
-            
             hint_code: str = response_data.get('hintCode')
-            message: str = self.RFA[self.HINT_CODE_TO_RFA.get(hint_code, self.DEFAULT_HINT_CODES[status])]
+            message: str = self.RFA[self.HINT_CODE_TO_RFA.get(
+                hint_code, self.DEFAULT_HINT_CODES[status])]
 
             return {
                 'status': status,
@@ -178,16 +189,16 @@ class BankIDService():
         try:
             auth = BankIDAuthentication.objects.get(
                 order_ref=order_ref)
-             
+
             response: Response = self._request(path='/rp/v6.0/cancel', payload={
                 'orderRef': order_ref
             })
-            
+
             response.raise_for_status()
 
             auth.delete()
             cache.delete(order_ref)
-            
+
             return None
         except ObjectDoesNotExist:
             raise ValueError(

@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from .models import User
-from .jwt_authentication import CustomJWTAuthentication
+from .jwt_authentication import JWTAuthentication
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -21,7 +21,7 @@ def email_password_login(request: Request) -> Response:
     if user is None:
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    return Response({'token': CustomJWTAuthentication.generate_jwt(user)}, status=status.HTTP_200_OK)
+    return Response({'token': JWTAuthentication.generate_jwt(user)}, status=status.HTTP_200_OK)
 
 @csrf_exempt
 @api_view(['POST'])

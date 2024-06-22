@@ -27,7 +27,7 @@ INSTALLED_APPS: List[str] = [
 
 REST_FRAMEWORK: Dict[str, Union[Tuple[str, ...], str]] = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'authentication.jwt_authentication.CustomJWTAuthentication',
+        'authentication.jwt_authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'authentication.permissions.IsAuthenticated',
