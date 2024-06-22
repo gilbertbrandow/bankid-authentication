@@ -1,13 +1,13 @@
 import jwt
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.conf import settings
 from django.utils import timezone
 from rest_framework.request import Request
 from rest_framework import authentication, exceptions
 from .models import User, RefreshToken
 
-class CustomJWTAuthentication(authentication.BaseAuthentication):
+class JWTAuthentication(authentication.BaseAuthentication):
     """
     Custom JWT Authentication class.
     """
@@ -100,7 +100,20 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
                 raise exceptions.AuthenticationFailed('Refresh token has expired')
             
             # Generate new access token
-            access_token = CustomJWTAuthentication.generate_jwt(refresh_token.user)
+            access_token = JWTAuthentication.generate_jwt(refresh_token.user)
             return access_token
         except RefreshToken.DoesNotExist:
             raise exceptions.AuthenticationFailed('Invalid refresh token')
+
+    @staticmethod
+    def revoke_refresh_token(refresh_token_str: str) -> None:
+        """
+        Revoke the refresh token by deleting it from the database.
+
+        @param refresh_token_str: The refresh token string.
+        """
+        try:
+            refresh_token = RefreshToken.objects.get(token=refresh_token_str)
+            refresh_token.delete()
+        except RefreshToken.DoesNotExist:
+            pass  # If the token does not exist, it's already revoked
