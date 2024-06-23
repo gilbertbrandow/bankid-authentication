@@ -4,10 +4,29 @@ URL configuration for authentication.
 """
 
 from django.urls import path
-from .authentication_views import email_password_login, bankid_initiate_authentication, generate_qr_code, poll_authentication_status, cancel_authentication
-from .views import AccountList, AccountDetail, GroupList, GroupDetail, UserList, UserDetail, PermissionList, PermissionDetail
+from .authentication_views import (
+    refresh_token,
+    email_password_login,
+    bankid_initiate_authentication,
+    generate_qr_code,
+    poll_authentication_status,
+    cancel_authentication
+)
+from .views import (
+    AccountList,
+    AccountDetail,
+    GroupList,
+    GroupDetail,
+    UserList,
+    UserDetail,
+    PermissionList,
+    PermissionDetail
+)
 
 urlpatterns = [
+    # Refresh authentication token
+    path('authentication/refresh-token/', refresh_token, name='refresh_token'),
+    
     # Login
     path('authentication/login/', email_password_login, name='email_password_login'),
     

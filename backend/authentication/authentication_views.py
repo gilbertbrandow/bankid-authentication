@@ -10,7 +10,17 @@ from rest_framework.decorators import api_view, permission_classes
 from authentication.services.bankid_service import BankIDService
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import exceptions
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def refresh_token(request: Request) -> Response:
+    refresh_token_str = request.data.get('refresh_token')
+    try:
+        new_access_token = JWTAuthentication.refresh_access_token(refresh_token_str)
+        return Response({'access_token': new_access_token}, status=status.HTTP_200_OK)
+    except exceptions.AuthenticationFailed as e:
+        return Response({'detail': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
