@@ -3,7 +3,27 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
-from typing import Any, Optional, Union, Set
+from typing import Any, Optional, Set
+from django.utils import timezone
+
+
+class RefreshToken(models.Model):
+    user = models.ForeignKey(
+        'User', on_delete=models.CASCADE, related_name='refresh_tokens')
+    token = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    def is_expired(self) -> bool:
+        return timezone.now() >= self.expires_at if self.expires_at else False
+
+    def __str__(self) -> str:
+        return f"RefreshToken(user={self.user}, token={self.token})"
+
+    class Meta:
+        db_table: str = 'authentication_refresh_tokens'
+        verbose_name: str = 'Refresh Token'
+        verbose_name_plural: str = 'Refresh Tokens'
 
 
 class AccountManager(models.Manager):
@@ -24,6 +44,8 @@ class Account(models.Model):
 
     class Meta:
         db_table = 'authentication_accounts'
+        verbose_name: str = 'Account'
+        verbose_name_plural: str = 'Accounts'
 
     def __str__(self) -> str:
         return str({"content_type": "account", "id": self.id, "name": self.name})
@@ -41,10 +63,13 @@ class BankIDAuthentication(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'authentication_bankid'
-        
+        db_table: str = 'authentication_bankid'
+        verbose_name: str = 'BankID Authentication'
+        verbose_name_plural: str = 'BankID Authentications'
+
     def __str__(self) -> str:
         return self.order_ref
+
 
 class PermissionManager(models.Manager):
     def create_permission(self, name: str, **extra_fields: Any) -> 'Permission':
@@ -67,7 +92,9 @@ class Permission(models.Model):
     objects = PermissionManager()
 
     class Meta:
-        db_table = 'authentication_permissions'
+        db_table: str = 'authentication_permissions'
+        verbose_name: str = 'Permission'
+        verbose_name_plural: str = 'Permissions'
 
     def __str__(self) -> str:
         return str({"content_type": "permission", "id": self.id, "name": self.name})
@@ -153,7 +180,9 @@ class User(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        db_table = 'authentication_users'
+        db_table: str = 'authentication_users'
+        verbose_name: str = 'User'
+        verbose_name_plural: str = 'Users'
 
     def __str__(self) -> str:
         return str({"content_type": "user", "id": self.id, "email": self.email})
@@ -190,6 +219,8 @@ class Group(models.Model):
 
     class Meta:
         db_table = 'authentication_groups'
+        verbose_name: str = 'Group'
+        verbose_name_plural: str = 'Groups'
 
     def __str__(self) -> str:
         return str({"content_type": "group", "id": self.id, "name": self.name})
