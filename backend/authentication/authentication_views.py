@@ -11,6 +11,7 @@ from authentication.services.bankid_service import BankIDService
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def email_password_login(request: Request) -> Response:
@@ -21,7 +22,11 @@ def email_password_login(request: Request) -> Response:
     if user is None:
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    return Response({'token': JWTAuthentication.generate_jwt(user)}, status=status.HTTP_200_OK)
+    return Response({
+        'access_token': JWTAuthentication.generate_jwt(user),
+        'refresh_token': JWTAuthentication.generate_refresh_token(user).token
+    }, status=status.HTTP_200_OK)
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -29,12 +34,14 @@ def email_password_login(request: Request) -> Response:
 def bankid_initiate_authentication(request: Request) -> Response:
     bankid_service = BankIDService()
     try:
-        order_ref = bankid_service.initiate_authentication(end_user_ip=request.META.get('REMOTE_ADDR'))
+        order_ref = bankid_service.initiate_authentication(
+            end_user_ip=request.META.get('REMOTE_ADDR'))
         return Response({'orderRef': order_ref}, status=status.HTTP_200_OK)
     except requests.RequestException as e:
         return Response({'detail':  f"Failed to initiate BankID authentication: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'detail': f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @csrf_exempt
 @api_view(['GET'])
@@ -52,6 +59,7 @@ def generate_qr_code(request: Request, order_ref: str) -> HttpResponse:
     except Exception as e:
         return Response({'detail': f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @csrf_exempt
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -66,6 +74,7 @@ def poll_authentication_status(request: Request, order_ref: str) -> Response:
     except Exception as e:
         error_message = f"An unexpected error occurred: {str(e)}"
         return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @csrf_exempt
 @api_view(['DELETE'])
