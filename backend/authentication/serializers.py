@@ -1,6 +1,6 @@
 from typing import Any, Dict
 from rest_framework import serializers
-from .models import Account, Group, Permission, User
+from .models import RefreshToken, Account, Group, Permission, User
 from rest_framework.request import Request
 
 
@@ -55,3 +55,10 @@ class UserSerializer(serializers.ModelSerializer):
         if request and not request.user.is_superuser:
             validated_data['account'] = request.user.account
         return super().update(instance, validated_data)
+
+
+class RefreshTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RefreshToken
+        fields = ['user', 'token', 'created_at', 'expires_at']
+        read_only_fields = ['created_at', 'expires_at']
