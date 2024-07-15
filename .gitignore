@@ -7,6 +7,7 @@ db.sqlite3
 *.pyo
 *.pyd
 __pycache__/
+**/.mypy_cache/
 **/__pycache__/
 *.swp
 *.swo
