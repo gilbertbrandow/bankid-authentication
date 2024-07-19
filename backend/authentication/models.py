@@ -135,6 +135,7 @@ class User(models.Model):
         Permission, related_name='users', db_table='authentication_user_permission', blank=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
+    personal_number = models.CharField(max_length=255, unique=True)
     first_name = models.CharField(max_length=30, blank=False)
     last_name = models.CharField(max_length=30, blank=False)
     is_active = models.BooleanField(default=True)
