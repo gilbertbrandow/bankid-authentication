@@ -121,17 +121,17 @@ class BankIDService():
             qr_start_token = auth.qr_start_token
             qr_start_secret = auth.qr_start_secret
 
-            current_time = int(time.time() // 1)
+            current_time = int((datetime.datetime.now(
+                datetime.timezone.utc) - auth.created_at).total_seconds())
             qr_auth_code = hmac.new(
                 key=qr_start_secret.encode(),
                 msg=str(current_time).encode(),
                 digestmod=hashlib.sha256
             ).hexdigest()
 
-            return f"{qr_start_token}.{current_time}.{qr_auth_code}"
+            return f"bankid.{qr_start_token}.{current_time}.{qr_auth_code}"
         except ObjectDoesNotExist:
-            raise ValueError(
-                _("Invalid order reference."))
+            raise ValueError(_("Invalid order reference."))
         except Exception as e:
             raise
 
@@ -141,19 +141,20 @@ class BankIDService():
             qr_img.save(buffer)
             return buffer.getvalue()
 
-    def poll_authentication_status(self, order_ref: str) -> Dict[str, str | object]:
+    def poll_authentication_status(self, order_ref: str) -> Dict[str, Union[str, object]]:
         try:
-            response: Response = self._request(path='/rp/v6.0/collect', payload={
-                'orderRef': order_ref
-            })
+            response: Response = self._request(
+                path='/rp/v6.0/collect', payload={'orderRef': order_ref})
 
             response.raise_for_status()
             response_data = response.json()
 
             status: str = response_data.get('status')
+            hint_code: str = response_data.get('hintCode', '')
 
             if status == 'complete':
-                personal_number = response_data.get('completionData', {}).get(
+                completion_data = response_data.get('completionData', {})
+                personal_number = completion_data.get(
                     'user', {}).get('personalNumber')
                 if personal_number:
                     try:
@@ -162,23 +163,33 @@ class BankIDService():
                         BankIDAuthentication.objects.get(
                             order_ref=order_ref).delete()
 
+                        return {
+                            'status': status,
+                            'message': 'Authentication complete',
+                            'user': {
+                                'id': user.id,
+                                'email': user.email,
+                            }
+                        }
                     except User.DoesNotExist:
                         raise ValueError(
                             _('It does not seem you have an account associated with your personal number.'))
                 else:
                     raise ValueError(
                         'Personal number not found in completion data')
+
             elif status == 'failed':
                 BankIDAuthentication.objects.get(order_ref=order_ref).delete()
-
-            hint_code: str = response_data.get('hintCode')
-            message: str = self.RFA[self.HINT_CODE_TO_RFA.get(
-                hint_code, self.DEFAULT_HINT_CODES[status])]
+                return {
+                    'status': status,
+                    'message': self.RFA[self.HINT_CODE_TO_RFA.get(hint_code, self.DEFAULT_HINT_CODES[status])]
+                }
 
             return {
                 'status': status,
                 'hint_code': hint_code,
-                'message': message
+                'message': self.RFA[self.HINT_CODE_TO_RFA.get(
+                    hint_code, self.DEFAULT_HINT_CODES[status])]
             }
         except requests.RequestException as e:
             raise
