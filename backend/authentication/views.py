@@ -256,6 +256,6 @@ class PermissionDetail(CustomAPIView):
 
     @get_and_check_object_permissions(model=Permission)
     @check_superuser_permission()
-    def delete(self, request: Request, permission: Permission) -> Permission:
+    def delete(self, request: Request, permission: Permission) -> Response:
         permission.delete()
         return Response({'success': 'Permission deleted.'}, status=status.HTTP_204_NO_CONTENT)
