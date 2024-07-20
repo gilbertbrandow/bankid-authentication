@@ -29,6 +29,12 @@ ENV/
 
 # Logs
 *.log
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # Static files
 staticfiles/
@@ -43,7 +49,8 @@ htmlcov/
 .ipynb_checkpoints
 
 # VS Code settings
-.vscode/
+.vscode/*
+!.vscode/extensions.json
 
 # Mac OS specific
 .DS_Store
@@ -69,11 +76,17 @@ pids/
 
 # Production
 /frontend/build
+/frontend/dist
+/frontend/dist-ssr
+*.local
 
-# Miscellaneous
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # Ignore production certificates in authentication
 /backend/authentication/certificates/production

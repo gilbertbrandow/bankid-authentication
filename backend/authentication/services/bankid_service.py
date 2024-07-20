@@ -1,6 +1,5 @@
 import io
 import hmac
-import time
 import qrcode
 import hashlib
 import requests
