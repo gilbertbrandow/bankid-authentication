@@ -78,6 +78,8 @@ def poll_authentication_status(request: Request, order_ref: str) -> Response:
     try:
         auth = bankid_service.poll_authentication_status(order_ref)
         return Response(auth, status=status.HTTP_200_OK)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except requests.RequestException as e:
         error_message = f"Failed to poll BankID authentication status: {str(e)}"
         return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)

@@ -5,6 +5,7 @@ import qrcode
 import hashlib
 import requests
 import datetime
+from authentication.jwt_authentication import JWTAuthentication
 from authentication.models import User
 from requests.models import Response
 from django.core.cache import cache
@@ -164,12 +165,8 @@ class BankIDService():
                             order_ref=order_ref).delete()
 
                         return {
-                            'status': status,
-                            'message': 'Authentication complete',
-                            'user': {
-                                'id': user.id,
-                                'email': user.email,
-                            }
+                            'access_token': JWTAuthentication.generate_jwt(user),
+                            'refresh_token': JWTAuthentication.generate_refresh_token(user).token
                         }
                     except User.DoesNotExist:
                         raise ValueError(
@@ -177,17 +174,12 @@ class BankIDService():
                 else:
                     raise ValueError(
                         'Personal number not found in completion data')
-
             elif status == 'failed':
                 BankIDAuthentication.objects.get(order_ref=order_ref).delete()
-                return {
-                    'status': status,
-                    'message': self.RFA[self.HINT_CODE_TO_RFA.get(hint_code, self.DEFAULT_HINT_CODES[status])]
-                }
+                raise ValueError(self.RFA[self.HINT_CODE_TO_RFA.get(hint_code, self.DEFAULT_HINT_CODES[status])])
 
             return {
                 'status': status,
-                'hint_code': hint_code,
                 'message': self.RFA[self.HINT_CODE_TO_RFA.get(
                     hint_code, self.DEFAULT_HINT_CODES[status])]
             }
