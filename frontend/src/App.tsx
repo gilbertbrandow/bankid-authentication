@@ -9,16 +9,15 @@ const App = () => {
       <Button
         variant="outline"
         onClick={() => {
-          toast("Event has been created", {
-            description: "Sunday, December 03, 2023 at 9:00 AM",
+          toast("Toast has been created", {
+            description: "Just now",
             action: {
               label: "Undo",
-              onClick: () => console.log("Undo"),
             },
           })
         }}
       >
-        Add to calendar
+        Create sonner toaster
       </Button>
       <Toaster />
     </>
