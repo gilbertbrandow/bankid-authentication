@@ -67,3 +67,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.group.toaster .group-\[\.toaster\]\:border-border {
+  border-color: hsl(var(--border));
+  border-width: 1px;
+}
