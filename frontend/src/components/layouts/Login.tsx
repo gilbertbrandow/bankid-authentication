@@ -19,7 +19,7 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
     <div className="flex h-screen">
       <div className="relative w-2/5 h-full flex items-center justify-center py-12">
         <header className="absolute top-0 w-full flex justify-between items-center p-8">
-          <Logo color="--primary" size={32}/>
+          <Logo color="--primary" size={32} />
           <div className="flex items-right gap-2">
             {location.pathname !== "/login" && (
               <Button
@@ -36,9 +36,13 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
         </header>
         <Outlet />
         <footer className="absolute bottom-0 w-full text-sm text-muted-foreground p-10">
-        <hr className="border-1 mb-4" style={{ borderColor: 'hsl(var(--input))' }} />
+          <hr
+            className="border-1 mb-4"
+            style={{ borderColor: "hsl(var(--input))" }}
+          />
           <div className="flex justify-between">
             <a
+              target="_blank"
               href="https://github.com/gilbertbrandow"
               className="underline flex items-center gap-1"
             >
@@ -67,7 +71,11 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
           </Avatar>
           <span>
             Video by{" "}
-            <a href="" className="underline">
+            <a
+              target="_blank"
+              href="https://www.pexels.com/@yaroslav-shuraev/"
+              className="underline"
+            >
               Yaroslav Sharaev
             </a>
           </span>
