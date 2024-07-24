@@ -19,7 +19,11 @@ const Login = () => {
         <BankIDLogo color="#ffffff" size={2} />
         Login with mobile BankID
       </Button>
-      <Button variant="outline" className="w-full items-center gap-2 justify-center">
+      <Button
+        variant="outline"
+        className="w-full items-center gap-2 justify-center"
+        onClick={() => navigate("/bankid-same-device-login")}
+      >
         <BankIDLogo color="#000" size={2} />
         Login with BankID on this device
       </Button>
