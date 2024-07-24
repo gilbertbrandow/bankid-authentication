@@ -3,14 +3,16 @@ import React from "react";
 interface LogoProps {
   color: string;
   size?: number;
+  className?: string;
 }
 
-const Logo: React.FC<LogoProps> = ({ color, size = 24 }) => (
+const Logo: React.FC<LogoProps> = ({ color, size = 24, className="" }) => (
   <svg
     viewBox="0 0 512 512"
     xmlns="http://www.w3.org/2000/svg"
     width={size}
     height={size}
+    className={className}
   >
     <path
       fill={color}
