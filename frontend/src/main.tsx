@@ -4,6 +4,7 @@ import App from "./App";
 import "./app/globals.css";
 import { I18nextProvider } from 'react-i18next';
 import i18n from "./i18n";
+import { AuthProvider } from "./context/AuthContext";
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
@@ -11,7 +12,9 @@ if (rootElement) {
   root.render(
     <React.StrictMode>
       <I18nextProvider i18n={i18n}>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </I18nextProvider>
     </React.StrictMode>
   );

@@ -1,27 +1,81 @@
-const BASE_URL = 'http://localhost:8000/api/';
+// utils/api.ts
+import {
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+  clearTokens,
+} from "./auth";
+import { NavigateFunction } from "react-router-dom";
 
-export async function apiRequest(endpoint: string, options: RequestInit = {}) {
+const BASE_URL = "http://localhost:8000/api/";
+
+export async function apiRequest(
+  endpoint: string,
+  options: RequestInit = {},
+  navigate?: NavigateFunction
+) {
   const url = `${BASE_URL}${endpoint}`;
+  const accessToken = getAccessToken();
 
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
+  const fetchWithToken = async (token?: string | null) => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(options.headers as Record<string, string>),
+    };
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw {
-        status: response.status,
-        message: errorData.detail || 'An error occurred',
-      };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
-    return await response.json();
-  } catch (error) {
-    throw error;
+    return await fetch(url, {
+      ...options,
+      headers,
+    });
+  };
+
+  let response = await fetchWithToken(accessToken);
+
+  if (response.status === 401) {
+    const refreshToken = getRefreshToken();
+    if (refreshToken) {
+      try {
+        const refreshResponse = await fetch(
+          `${BASE_URL}authentication/refresh/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+          }
+        );
+
+        if (!refreshResponse.ok) {
+          throw new Error("Failed to refresh token");
+        }
+
+        const refreshData = await refreshResponse.json();
+        setTokens(refreshData.access_token, refreshToken);
+        response = await fetchWithToken(refreshData.access_token);
+      } catch (refreshError) {
+        clearTokens();
+        if (navigate) {
+          navigate("/login");
+        }
+        throw new Error("Session expired. Please log in again.");
+      }
+    } else {
+      clearTokens();
+      if (navigate) {
+        navigate("/login");
+      }
+      throw new Error("Session expired. Please log in again.");
+    }
   }
+
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+
+  return await response.json();
 }
