@@ -17,6 +17,7 @@ import {
 import { apiRequest } from "../../lib/api";
 import { useState } from "react";
 import { AlertDestructive } from "../../components/ui/AlertDestructive";
+import { useAuth } from "../../context/AuthContext";
 import Spinner from "../../components/icons/Spinner";
 
 type FormData = z.infer<typeof LoginFormSchema>;
@@ -24,8 +25,9 @@ type FormData = z.infer<typeof LoginFormSchema>;
 const EmailLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { setAuthTokens } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(LoginFormSchema),
@@ -36,21 +38,21 @@ const EmailLogin = () => {
   });
 
   const onSubmit = async (values: FormData) => {
-    setIsLoading(true);
-    setErrorMessage("")
-    
+    setErrorMessage("");
+    setLoading(true);
+
     try {
       const data = await apiRequest("authentication/login/", {
         method: "POST",
         body: JSON.stringify(values),
       });
 
-      console.log(data)
-      setIsLoading(false);
-
+      setAuthTokens(data.access_token, data.refresh_token);
+      setLoading(false);
+      navigate("/dashboard");
     } catch (error: any) {
       setErrorMessage(error.message);
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -72,8 +74,8 @@ const EmailLogin = () => {
                   type="email"
                   placeholder="m@example.com"
                   required
-                  disabled={isLoading}
                   {...field}
+                  disabled={loading}
                 />
               </FormControl>
               <FormMessage />
@@ -91,10 +93,8 @@ const EmailLogin = () => {
                   variant="link"
                   className="ml-auto pl-2 pr-0 text-muted-foreground hover:text-current flex items-center gap-2 inline-block text-xs underline"
                   onClick={() => navigate("/recover-password")}
-                  disabled={isLoading}
                 >
                   {t("Forgot your password?")}
-                  
                 </Button>
               </div>
               <FormControl>
@@ -103,18 +103,20 @@ const EmailLogin = () => {
                   type="password"
                   placeholder="********"
                   required
-                  disabled={isLoading}
                   {...field}
+                  disabled={loading}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full gap-4" disabled={isLoading}>
-           {isLoading && (<Spinner size={1.2} color="primary" />) } {t("Login")}
+        <Button type="submit" className="w-full gap-4" disabled={loading}>
+          {loading && <Spinner size={1.2} color="primary" />} {t("Login")}
         </Button>
-        {errorMessage && (<AlertDestructive title="Error" description={errorMessage} />) }
+        {errorMessage && (
+          <AlertDestructive title="Error" description={errorMessage} />
+        )}
       </form>
     </Form>
   );
