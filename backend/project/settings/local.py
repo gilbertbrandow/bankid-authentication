@@ -21,6 +21,7 @@ ALLOWED_HOSTS: List[str] = []
 INSTALLED_APPS: List[str] = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'corsheaders',
     'rest_framework',
     'authentication',
 ]
@@ -52,6 +53,12 @@ MIDDLEWARE: List[str] = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
 ]
 
 ROOT_URLCONF: str = 'project.urls'
@@ -72,7 +79,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION: str = 'project.wsgi.application'
 
-DATABASES: Dict[str, Dict[str, str|None]] = {
+DATABASES: Dict[str, Dict[str, str | None]] = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': get_secret("POSTGRES_NAME"),
