@@ -9,7 +9,7 @@ const Login = () => {
   return (
     <div className="mx-auto grid w-[400px] gap-4">
       <h1 className="text-3xl font-bold mb-4 text-center">
-        Sign in to Waves
+        Sign in to Auth
         <span className="align-super text-sm"> ©</span>
       </h1>
       <Button

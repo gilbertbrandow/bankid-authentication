@@ -5,6 +5,7 @@ import { Outlet } from "react-router-dom";
 import { Github, ArrowLeft } from "lucide-react";
 import Logo from "../icons/Logo";
 import { Button } from "../ui/button";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 interface LoginLayoutProps {
   children?: ReactNode;
@@ -18,21 +19,24 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
     <div className="flex h-screen">
       <div className="relative w-2/5 h-full flex items-center justify-center py-12">
         <header className="absolute top-0 w-full flex justify-between items-center p-8">
-          <Logo size={32} color="#000000" className="mt-1" />
-          {location.pathname !== "/login" && (
-            <Button
-              variant="link"
-              className="pl-2 pr-0 flex items-center gap-2"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          )}
+          <Logo color="--primary" size={32}/>
+          <div className="flex items-right gap-2">
+            {location.pathname !== "/login" && (
+              <Button
+                variant="ghost"
+                className="pl-2 pr-2 flex items-center gap-1"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            )}
+            <ThemeToggle />
+          </div>
         </header>
         <Outlet />
         <footer className="absolute bottom-0 w-full text-sm text-muted-foreground p-10">
-          <hr className="border-gray-300 mb-4" />
+        <hr className="border-1 mb-4" style={{ borderColor: 'hsl(var(--input))' }} />
           <div className="flex justify-between">
             <a
               href="https://github.com/gilbertbrandow"

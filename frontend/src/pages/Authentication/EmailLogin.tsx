@@ -26,7 +26,7 @@ const EmailLogin = () => {
           </div>
           <Input id="password" type="password" placeholder="*******" required />
         </div>
-        <Button type="submit" variant="outline" className="w-full">
+        <Button type="submit" className="w-full">
           Login
         </Button>
       </div>
