@@ -9,7 +9,7 @@ i18n
   .use(initReactI18next)
   .init({
     backend: {
-      loadPath: "/locales/translation.{{lng}}.json",
+      loadPath: (lng: string) => lng === 'en' ? null : `/locales/translation.${lng}.json`,
     },
     fallbackLng: "en",
     debug: true,
@@ -24,5 +24,11 @@ i18n
       useSuspense: false,
     },
   });
+
+i18n.on('missingKey', function(lngs, namespace, key, res) {
+  if (lngs[0] !== 'en') {
+    console.warn(`Missing translation for key: ${key} in language: ${lngs[0]}`);
+  }
+});
 
 export default i18n;

@@ -30,7 +30,7 @@ def email_password_login(request: Request) -> Response:
     user = User.objects.authenticate(email=email, password=password)
 
     if user is None:
-        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({
         'access_token': JWTAuthentication.generate_jwt(user),
