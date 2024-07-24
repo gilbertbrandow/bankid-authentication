@@ -1,5 +1,5 @@
-import BankIDLogo from "../components/icons/BankIDLogo";
-import { Button } from "../components/ui/button";
+import BankIDLogo from "../../components/icons/BankIDLogo";
+import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { LockOpen } from "lucide-react";
 
