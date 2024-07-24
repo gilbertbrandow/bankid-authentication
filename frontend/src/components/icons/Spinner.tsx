@@ -15,8 +15,8 @@ const Spinner: React.FC<SpinnerProps> = ({ color = '#000', size = 2 }) => {
         .spinner {
           position: relative;
           display: inline-block;
-          border: ${spinnerBorderSize} solid rgba(0, 0, 0, 0.1);
-          border-top: ${spinnerBorderSize} solid ${color};
+          border: ${spinnerBorderSize} solid hsl(var(--input));
+          border-top: ${spinnerBorderSize} solid hsl(var(--primary));
           border-radius: 50%;
           animation: spin 1s linear infinite;
         }
