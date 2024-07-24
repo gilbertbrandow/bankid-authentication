@@ -48,7 +48,6 @@ const EmailLogin = () => {
       });
 
       setAuthTokens(data.access_token, data.refresh_token);
-      setLoading(false);
       navigate("/dashboard");
     } catch (error: any) {
       setErrorMessage(error.message);

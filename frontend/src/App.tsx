@@ -6,13 +6,15 @@ import RecoverPassword from "./pages/Authentication/RecoverPassword";
 import Login from "./pages/Authentication/Login";
 import BankIDLogin from "./pages/Authentication/BankIDLogin";
 import BankIDSameDeviceLogin from "./pages/Authentication/BankIDSameDeviceLogin";
+import DefaultLayout from "./components/layouts/Default";
+import Permissions from "./pages/Permissions";
 
 const App = () => {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Router>
         <Routes>
-          <Route path="/" element={<LoginLayout />}>
+          <Route element={<LoginLayout />}>
             <Route path="login" element={<Login />} />
             <Route path="email-login" element={<EmailLogin />} />
             <Route path="bankid-login" element={<BankIDLogin />} />
@@ -21,6 +23,9 @@ const App = () => {
               element={<BankIDSameDeviceLogin />}
             />
             <Route path="recover-password" element={<RecoverPassword />} />
+          </Route>
+          <Route element={<DefaultLayout />}>
+            <Route path="permissions" element={<Permissions />} />
           </Route>
         </Routes>
       </Router>
