@@ -2,9 +2,16 @@ import BankIDLogo from "../../components/icons/BankIDLogo";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { LockOpen } from "lucide-react";
+import { useTheme } from "../../components/theme-provider";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  const { theme } = useTheme();
+
+  const isDarkMode = theme === "dark";
+  const buttonBgColor = isDarkMode ? "bg-primary" : "bg-[#193E4F]";
+  const logoColor = isDarkMode ? "#193E4F" : "#ffffff";
 
   return (
     <div className="mx-auto grid w-[400px] gap-4">
@@ -13,10 +20,10 @@ const Login = () => {
         <span className="align-super text-sm"> ©</span>
       </h1>
       <Button
-        className="w-full bg-[#193E4F] text-white flex items-center gap-2 justify-center"
+        className={`w-full flex items-center gap-2 justify-center ${buttonBgColor}`}
         onClick={() => navigate("/bankid-login")}
       >
-        <BankIDLogo color="#ffffff" size={2} />
+        <BankIDLogo color={logoColor} size={2} />
         Login with mobile BankID
       </Button>
       <Button
