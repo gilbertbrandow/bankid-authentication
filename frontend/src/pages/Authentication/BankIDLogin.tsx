@@ -2,15 +2,17 @@ import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import BankIDLogo from "../../components/icons/BankIDLogo";
 import { useTheme } from "../../components/theme-provider";
+import { useTranslation } from "react-i18next";
 
 const BankIDLogin = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
       <h1 className="text-3xl font-bold mb-2 text-center inline-flex items-center">
-        Scan (<BankIDLogo size={3.5} color="#000" />) QR Code
+        {t("Scan")} (<BankIDLogo size={3.5} color="#000" />) {t("QR Code")}
       </h1>
       <div className="max-w-[320px]">
         <img
@@ -24,7 +26,7 @@ const BankIDLogin = () => {
         kameran mot QR-koden här ovanför.
       </p>
       <Button variant="ghost" onClick={() => navigate(-1)}>
-        Cancel authentication
+        {t("Cancel authentication")}
       </Button>
     </div>
   );

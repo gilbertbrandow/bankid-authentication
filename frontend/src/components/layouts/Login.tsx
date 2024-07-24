@@ -7,6 +7,7 @@ import Logo from "../icons/Logo";
 import { Button } from "../ui/button";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { LanguageSwitcher } from "../ui/language-switcher";
+import { useTranslation } from "react-i18next";
 
 interface LoginLayoutProps {
   children?: ReactNode;
@@ -15,6 +16,7 @@ interface LoginLayoutProps {
 const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <div className="flex h-screen">
@@ -29,7 +31,7 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
                 onClick={() => navigate(-1)}
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back
+                {t("Back")}
               </Button>
             )}
             <LanguageSwitcher />
@@ -51,7 +53,10 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
               <Github className="h-4 w-4" />
               gilbertbrandow
             </a>
-            <span>Copyright © {new Date().getFullYear()} </span>
+            <span>
+              {" "}
+              {t("Copyright")} © {new Date().getFullYear()}{" "}
+            </span>
           </div>
         </footer>
       </div>
@@ -72,7 +77,7 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
             <AvatarFallback>YS</AvatarFallback>
           </Avatar>
           <span>
-            Video by{" "}
+            {t("Video by")}{" "}
             <a
               target="_blank"
               href="https://www.pexels.com/@yaroslav-shuraev/"
