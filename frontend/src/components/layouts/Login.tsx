@@ -6,6 +6,7 @@ import { Github, ArrowLeft } from "lucide-react";
 import Logo from "../icons/Logo";
 import { Button } from "../ui/button";
 import { ThemeToggle } from "../ui/theme-toggle";
+import { LanguageSwitcher } from "../ui/language-switcher";
 
 interface LoginLayoutProps {
   children?: ReactNode;
@@ -31,6 +32,7 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
                 Back
               </Button>
             )}
+            <LanguageSwitcher />
             <ThemeToggle />
           </div>
         </header>
