@@ -1,15 +1,16 @@
 import React, { ReactNode } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { Outlet } from 'react-router-dom';
 
-interface LayoutProps {
-  children: ReactNode;
+interface LoginLayoutProps {
+  children?: ReactNode;
 }
 
-const Login: React.FC<LayoutProps> = ({ children }) => {
+const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen">
       <div className="w-2/5 h-full flex items-center justify-center py-12">
-        {children}
+        <Outlet />
       </div>
       <div className="relative w-3/5 h-full p-4">
         <video
@@ -39,4 +40,4 @@ const Login: React.FC<LayoutProps> = ({ children }) => {
   );
 };
 
-export default Login;
+export default LoginLayout;
