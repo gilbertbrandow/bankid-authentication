@@ -7,12 +7,31 @@ import {
 } from "./dropdown-menu";
 import { Button } from "../../components/ui/button";
 import Flag from "../icons/Flag";
+import { useState } from "react";
+import Spinner from "../icons/Spinner";
+import { useApiRequest } from "../../lib/api";
 
 export function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const apiRequest = useApiRequest();
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
+  const changeLanguage = async (lng: string) => {
+    if (i18n.language === lng) return;
+
+    setLoading(true);
+
+    try {
+      const response = await apiRequest("set_language/", {
+        method: "POST",
+        body: JSON.stringify({ language: lng }),
+      });
+
+      await i18n.changeLanguage(lng);
+    } catch (error: any) {
+      console.error(error);
+    }
+    setLoading(false);
   };
 
   const currentLang = i18n.language === "sv" ? "sv" : "en";
@@ -24,7 +43,11 @@ export function LanguageSwitcher() {
           variant="ghost"
           className="p-2 flex items-center gap-2 hover:cursor-pointer"
         >
-          <Flag country={currentLang} className="w-6 h-6" />
+          {loading ? (
+            <Spinner size={1} />
+          ) : (
+            <Flag country={currentLang} className="w-6 h-6" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

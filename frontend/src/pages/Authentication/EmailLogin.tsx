@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../../components/ui/form";
-import { apiRequest } from "../../lib/api";
+import { useApiRequest } from "../../lib/api";
 import { useState } from "react";
 import { AlertDestructive } from "../../components/ui/AlertDestructive";
 import { useAuth } from "../../context/AuthContext";
@@ -28,6 +28,7 @@ const EmailLogin = () => {
   const { setAuthTokens } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const apiRequest = useApiRequest();
 
   const form = useForm<FormData>({
     resolver: zodResolver(LoginFormSchema),

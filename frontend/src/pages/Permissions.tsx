@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { apiRequest } from "../lib/api";
+import { useApiRequest } from "../lib/api";
 import { Permission } from "../types/permissions";
 
 const Permissions: React.FC = () => {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const apiRequest = useApiRequest();
 
   useEffect(() => {
     const fetchPermissions = async () => {

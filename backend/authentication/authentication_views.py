@@ -120,5 +120,6 @@ def set_language(request: Request) -> Response:
     
     activate(lang_code)
     request.session[settings.LANGUAGE_COOKIE_NAME] = lang_code
+    request.session.save()
     return Response(status=204)
 
