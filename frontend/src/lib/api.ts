@@ -1,4 +1,3 @@
-// utils/api.ts
 import {
   getAccessToken,
   getRefreshToken,
@@ -6,6 +5,7 @@ import {
   clearTokens,
 } from "./auth";
 import { NavigateFunction } from "react-router-dom";
+import i18n from "i18next"; // Directly import i18n for translations
 
 const BASE_URL = "http://localhost:8000/api/";
 
@@ -62,20 +62,29 @@ export async function apiRequest(
         if (navigate) {
           navigate("/login");
         }
-        throw new Error("Session expired. Please log in again.");
+        throw new Error(i18n.t("Session expired. Please log in again."));
       }
     } else {
       clearTokens();
       if (navigate) {
         navigate("/login");
       }
-      throw new Error("Session expired. Please log in again.");
+      throw new Error(i18n.t("Session expired. Please log in again."));
     }
   }
 
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(i18n.t("Something went wrong."));
   }
 
-  return await response.json();
+  if (!response.ok) {
+    const errorMessage = data.detail || i18n.t("Something went wrong.");
+    throw new Error(errorMessage);
+  }
+
+  return data;
 }
