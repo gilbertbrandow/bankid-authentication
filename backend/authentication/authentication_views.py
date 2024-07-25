@@ -11,16 +11,22 @@ from authentication.services.bankid_service import BankIDService
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import exceptions
+from django.utils.translation import gettext_lazy as _
+from django.conf import settings
+from django.utils.translation import activate
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def refresh_token(request: Request) -> Response:
     refresh_token_str = request.data.get('refresh_token')
     try:
-        new_access_token = JWTAuthentication.refresh_access_token(refresh_token_str)
+        new_access_token = JWTAuthentication.refresh_access_token(
+            refresh_token_str)
         return Response({'access_token': new_access_token}, status=status.HTTP_200_OK)
     except exceptions.AuthenticationFailed as e:
         return Response({'detail': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -30,7 +36,7 @@ def email_password_login(request: Request) -> Response:
     user = User.objects.authenticate(email=email, password=password)
 
     if user is None:
-        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': _('Invalid credentials')}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({
         'access_token': JWTAuthentication.generate_jwt(user),
@@ -102,3 +108,17 @@ def cancel_authentication(request: Request, order_ref: str) -> Response:
     except Exception as e:
         error_message = f"An unexpected error occurred: {str(e)}"
         return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def set_language(request: Request) -> Response:
+    lang_code = request.data.get('language', settings.LANGUAGE_CODE)
+    
+    if lang_code and lang_code not in dict(settings.LANGUAGES).keys():
+        return Response({'detail': 'Invalid language code'}, status=400)
+    
+    activate(lang_code)
+    request.session[settings.LANGUAGE_COOKIE_NAME] = lang_code
+    return Response(status=204)
+

@@ -10,7 +10,8 @@ from .authentication_views import (
     bankid_initiate_authentication,
     generate_qr_code,
     poll_authentication_status,
-    cancel_authentication
+    cancel_authentication,
+    set_language
 )
 from .views import (
     AccountList,
@@ -35,6 +36,9 @@ urlpatterns = [
     path('authentication/bankid/qr/<str:order_ref>/', generate_qr_code, name='bankid_qr_code'),
     path('authentication/bankid/poll/<str:order_ref>/', poll_authentication_status, name='bankid_poll'),
     path('authentication/bankid/cancel/<str:order_ref>/', cancel_authentication, name='bankid_cancel'),
+    
+    # Change language
+    path('set_language/', set_language, name='set_language'),
     
     # Object CRUDs
     path('accounts/', AccountList.as_view(), name='account_list'),
