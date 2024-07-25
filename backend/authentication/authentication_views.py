@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from .models import User
 from .jwt_authentication import JWTAuthentication
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from authentication.services.bankid_service import BankIDService
 from django.http import HttpResponse
@@ -123,3 +123,13 @@ def set_language(request: Request) -> Response:
     request.session.save()
     return Response(status=204)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout(request: Request) -> Response:
+    user = request.user
+    
+    JWTAuthentication.revoke_all_refresh_tokens(user)
+    request.session.flush()
+
+    return Response({'detail': _('Successfully logged out.')}, status=status.HTTP_200_OK)

@@ -11,7 +11,8 @@ from .authentication_views import (
     generate_qr_code,
     poll_authentication_status,
     cancel_authentication,
-    set_language
+    set_language, 
+    logout
 )
 from .views import (
     AccountList,
@@ -30,6 +31,9 @@ urlpatterns = [
     
     # Login
     path('authentication/login/', email_password_login, name='email_password_login'),
+    
+    # Logout
+    path('authentication/logout/', logout, name='logout'),
     
     # BankID authentication
     path('authentication/bankid/initiate/', bankid_initiate_authentication, name='bankid_initiate'),
