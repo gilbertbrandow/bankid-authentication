@@ -9,6 +9,9 @@ COPY requirements.txt /app/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+# Install GNU gettext tools
+RUN apt-get update && apt-get install -y gettext
+
 COPY . /app/
 
 EXPOSE 8000

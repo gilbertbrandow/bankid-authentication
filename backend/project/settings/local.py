@@ -9,6 +9,8 @@ from datetime import timedelta
 from pathlib import Path
 from project.settings import get_secret
 from typing import Dict, Tuple, List, Any, Union
+from django.utils.translation import gettext_lazy as _
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -55,10 +57,22 @@ MIDDLEWARE: List[str] = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.locale.LocaleMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+]
+
+LANGUAGE_CODE: str = 'en'
+
+LANGUAGES: List[tuple[str, str]] = [
+    ('en', _('English')),
+    ('sv', _('Swedish'))
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
 ]
 
 ROOT_URLCONF: str = 'project.urls'
@@ -89,8 +103,6 @@ DATABASES: Dict[str, Dict[str, str | None]] = {
         'PORT': get_secret("POSTGRES_PORT"),
     }
 }
-
-LANGUAGE_CODE: str = 'en-us'
 
 TIME_ZONE: str = 'UTC'
 
