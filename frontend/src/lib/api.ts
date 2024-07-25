@@ -1,18 +1,19 @@
+import { useTranslation } from "react-i18next";
+import { useNavigate, NavigateFunction } from "react-router-dom";
 import {
   getAccessToken,
   getRefreshToken,
   setTokens,
   clearTokens,
 } from "./auth";
-import { NavigateFunction } from "react-router-dom";
-import i18n from "i18next"; // Directly import i18n for translations
 
 const BASE_URL = "http://localhost:8000/api/";
 
-export async function apiRequest(
+async function apiRequest(
   endpoint: string,
   options: RequestInit = {},
-  navigate?: NavigateFunction
+  navigate: NavigateFunction,
+  t: (key: string) => string
 ) {
   const url = `${BASE_URL}${endpoint}`;
   const accessToken = getAccessToken();
@@ -20,6 +21,7 @@ export async function apiRequest(
   const fetchWithToken = async (token?: string | null) => {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
       ...(options.headers as Record<string, string>),
     };
 
@@ -30,6 +32,7 @@ export async function apiRequest(
     return await fetch(url, {
       ...options,
       headers,
+      credentials: "include",
     });
   };
 
@@ -45,8 +48,10 @@ export async function apiRequest(
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"),
             },
             body: JSON.stringify({ refresh_token: refreshToken }),
+            credentials: "include",
           }
         );
 
@@ -59,17 +64,13 @@ export async function apiRequest(
         response = await fetchWithToken(refreshData.access_token);
       } catch (refreshError) {
         clearTokens();
-        if (navigate) {
-          navigate("/login");
-        }
-        throw new Error(i18n.t("Session expired. Please log in again."));
+        navigate("/login");
+        throw new Error(t("Session expired. Please log in again."));
       }
     } else {
       clearTokens();
-      if (navigate) {
-        navigate("/login");
-      }
-      throw new Error(i18n.t("Session expired. Please log in again."));
+      navigate("/login");
+      throw new Error(t("Session expired. Please log in again."));
     }
   }
 
@@ -78,13 +79,40 @@ export async function apiRequest(
   try {
     data = text ? JSON.parse(text) : {};
   } catch {
-    throw new Error(i18n.t("Something went wrong."));
+    throw new Error(t("Something went wrong."));
   }
 
   if (!response.ok) {
-    const errorMessage = data.detail || i18n.t("Something went wrong.");
+    const errorMessage = data.detail || t("Something went wrong.");
     throw new Error(errorMessage);
   }
 
   return data;
+}
+
+function getCookie(name: string): string {
+  let cookieValue = "";
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+export function useApiRequest() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  return async function (
+    endpoint: string,
+    options: RequestInit = {}
+  ) {
+    return await apiRequest(endpoint, options, navigate, t);
+  };
 }
