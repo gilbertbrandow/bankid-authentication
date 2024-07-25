@@ -68,6 +68,7 @@ CORS_ALLOWED_ORIGINS: list[str] = [
 
 CORS_ALLOW_CREDENTIALS: bool = True
 CORS_ALLOW_HEADERS: list[str] = [
+    'Authorization',
     'content-type',
     'x-csrftoken',
 ]
