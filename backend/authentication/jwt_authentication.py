@@ -117,3 +117,12 @@ class JWTAuthentication(authentication.BaseAuthentication):
             refresh_token.delete()
         except RefreshToken.DoesNotExist:
             pass  # If the token does not exist, it's already revoked
+
+    @staticmethod
+    def revoke_all_refresh_tokens(user: User) -> None:
+        """
+        Revoke all refresh tokens for the given user by deleting them from the database.
+
+        @param user: The user for whom the refresh tokens are being revoked.
+        """
+        RefreshToken.objects.filter(user=user).delete()
