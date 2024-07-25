@@ -52,17 +52,35 @@ JWT_AUTH: Dict[str, Any] = {
 MIDDLEWARE: List[str] = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'authentication.middlewares.locale_middleware.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.locale.LocaleMiddleware'
 ]
 
-CORS_ALLOWED_ORIGINS = [
+
+CORS_ALLOW_ALL_ORIGINS: bool = False
+CORS_ALLOWED_ORIGINS: list[str] = [
     "http://localhost:3000",
 ]
+
+
+CORS_ALLOW_CREDENTIALS: bool = True
+CORS_ALLOW_HEADERS: list[str] = [
+    'content-type',
+    'x-csrftoken',
+]
+
+CSRF_TRUSTED_ORIGINS: list[str] = [
+    "http://localhost:3000",
+]
+
+SESSION_ENGINE: str = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME: str = 'sessionid'
+SESSION_COOKIE_SECURE: bool = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE: bool = False
+SESSION_COOKIE_HTTPONLY: bool = True
 
 LANGUAGE_CODE: str = 'en'
 
@@ -74,6 +92,8 @@ LANGUAGES: List[tuple[str, str]] = [
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'locale'),
 ]
+
+LANGUAGE_COOKIE_NAME: str = 'language_code'
 
 ROOT_URLCONF: str = 'project.urls'
 
