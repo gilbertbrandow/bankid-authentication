@@ -8,6 +8,8 @@ from rest_framework import authentication, exceptions
 from .models import User, RefreshToken
 
 class JWTAuthentication(authentication.BaseAuthentication):
+    BEARER_PREFIX = 'Bearer '
+    
     """
     Custom JWT Authentication class.
     """
@@ -21,12 +23,16 @@ class JWTAuthentication(authentication.BaseAuthentication):
         @exception: Raises AuthenticationFailed if the token is invalid, expired, or if the user does not exist.
         """
         auth_header = request.headers.get('Authorization')
+        
+        if not auth_header or not auth_header.startswith(JWTAuthentication.BEARER_PREFIX):
+            return None
 
-        if not auth_header:
+        token = auth_header.replace(JWTAuthentication.BEARER_PREFIX, '', 1)
+
+        if not token:
             return None
 
         try:
-            token = auth_header.split(' ')[1]
             payload = jwt.decode(jwt=token, key=settings.JWT_AUTH['JWT_SECRET_KEY'], algorithms=[settings.JWT_AUTH['JWT_ALGORITHM']])
         except jwt.ExpiredSignatureError as e:
             raise exceptions.AuthenticationFailed('Token has expired')
@@ -41,16 +47,6 @@ class JWTAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed('User not found')
 
         return (user, token)
-
-    @staticmethod
-    def authenticate_header(request: Request) -> str:
-        """
-        Return the authentication header.
-
-        @param request: The HTTP request object.
-        @return: The authentication header string.
-        """
-        return 'Bearer'
 
     @staticmethod
     def generate_jwt(user: User) -> str:

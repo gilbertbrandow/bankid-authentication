@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission
-from .exceptions import PermissionDenied
+from .exceptions import PermissionDenied, NotAuthenticated
 from rest_framework.request import Request
 from authentication.models import Account
 from typing import Type, TYPE_CHECKING
@@ -9,7 +9,6 @@ from authentication.models import Permission
 if TYPE_CHECKING:
     from rest_framework.views import APIView
 
-
 class IsAuthenticated(BasePermission):
     """
     Base permission to only allow authenticated users.
@@ -18,7 +17,7 @@ class IsAuthenticated(BasePermission):
     def has_permission(request: Request, view: 'Type[APIView]') -> bool:
         if request.user and request.user.is_authenticated:
             return True
-        raise PermissionDenied(detail='You must be signed in to perform this action.')
+        raise NotAuthenticated(detail='You must be signed in to perform this action.')
 
 
 class IsSuperuser(BasePermission):
