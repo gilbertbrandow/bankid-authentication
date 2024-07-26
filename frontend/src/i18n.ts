@@ -9,10 +9,11 @@ i18n
   .use(initReactI18next)
   .init({
     backend: {
-      loadPath: (lng: string) => lng === 'en' ? null : `/locales/translation.${lng}.json`,
+      loadPath: (lng: string) =>
+        lng === "en" ? undefined : `/locales/translation.${lng}.json`,
     },
     fallbackLng: "en",
-    debug: true,
+    debug: false,
     detection: {
       order: ["queryString", "cookie", "localStorage", "navigator", "htmlTag"],
       caches: ["cookie"],
@@ -21,14 +22,16 @@ i18n
       escapeValue: false,
     },
     react: {
-      useSuspense: false,
+      useSuspense: true,
+    },
+    nsSeparator: false,
+    keySeparator: false,
+    saveMissing: true,
+    missingKeyHandler: (lng, ns, key, fallbackValue) => {
+      if (i18n.language !== "en") {
+        console.warn(`Missing translation for key: ${key} in language: ${i18n.language}`);
+      }
     },
   });
-
-i18n.on('missingKey', function(lngs, namespace, key, res) {
-  if (lngs[0] !== 'en') {
-    console.warn(`Missing translation for key: ${key} in language: ${lngs[0]}`);
-  }
-});
 
 export default i18n;
