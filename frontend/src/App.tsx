@@ -11,7 +11,7 @@ import Permissions from "./pages/Permissions";
 
 const App = () => {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light" storageKey="application-ui-theme">
       <Router>
         <Routes>
           <Route element={<LoginLayout />}>
