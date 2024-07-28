@@ -52,6 +52,44 @@ function getCookie(name: string): string {
   return cookieValue;
 }
 
+async function refreshAccessToken(refreshToken: string): Promise<Response> {
+  return await fetch(`${BASE_URL}authentication/refresh-token/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+    credentials: "include",
+  });
+}
+
+export async function checkTokenValidity(): Promise<boolean> {
+  const refreshToken = getRefreshToken();
+
+  if (!refreshToken) {
+    clearTokens();
+    return false;
+  }
+
+  try {
+    const refreshResponse = await refreshAccessToken(refreshToken);
+
+    if (!refreshResponse.ok) {
+      clearTokens();
+      return false;
+    }
+
+    const refreshData = await refreshResponse.json();
+    setTokens(refreshData.access_token, refreshToken);
+    return true;
+
+  } catch (error) {
+    clearTokens();
+    return false;
+  }
+}
+
 async function handle401(
   originalRequest: Request,
   navigate: NavigateFunction,
@@ -64,18 +102,7 @@ async function handle401(
   }
 
   try {
-    const refreshResponse = await fetch(
-      `${BASE_URL}authentication/refresh-token/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"),
-        },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-        credentials: "include",
-      }
-    );
+    const refreshResponse = await refreshAccessToken(refreshToken);
 
     if (!refreshResponse.ok) {
       return handleSessionExpired(navigate, t, null);
