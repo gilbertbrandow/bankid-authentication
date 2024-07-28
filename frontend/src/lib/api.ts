@@ -85,25 +85,11 @@ async function handle401(
 
     setTokens(refreshData.access_token, refreshToken);
 
-    const newHeaders = new Headers();
-
-    originalRequest.headers.forEach((value, key) => {
-      newHeaders.append(key, value);
-    });
-
-    newHeaders.set("Authorization", `Bearer ${refreshData.access_token}`);
-
-    const newRequest = new Request(originalRequest.url, {
-      method: originalRequest.method,
-      headers: newHeaders,
-      body: originalRequest.body,
-      credentials: "include",
-    });
-
-    const response = await fetchWithHeaders(newRequest, getAccessToken(), {});
-    return await handleResponse(response, newRequest, navigate, t);
+    const response = await fetchWithHeaders(originalRequest, getAccessToken(), {});
+    return await handleResponse(response, originalRequest, navigate, t);
+    
   } catch (refreshError) {
-    handleSessionExpired(navigate, t, null);
+    return handleSessionExpired(navigate, t, null);
   }
 }
 

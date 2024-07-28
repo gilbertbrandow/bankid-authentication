@@ -10,12 +10,12 @@ const rootElement = document.getElementById("root");
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
-    <React.StrictMode>
+    //<React.StrictMode> I removed this so that development would be same as production, toaster works differently otherwise.
       <I18nextProvider i18n={i18n}>
         <AuthProvider>
           <App />
         </AuthProvider>
       </I18nextProvider>
-    </React.StrictMode>
+    //</React.StrictMode>
   );
 }

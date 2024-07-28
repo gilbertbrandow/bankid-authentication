@@ -11,6 +11,7 @@ import Permissions from "./pages/Permissions";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./i18n";
 import { Suspense } from "react";
+import { Toaster } from "./components/ui/sonner"
 
 const Loading = () => <div>Loading...</div>;
 
@@ -36,6 +37,7 @@ const App = () => {
               </Route>
             </Routes>
           </Router>
+          <Toaster />
         </Suspense>
       </I18nextProvider>
     </ThemeProvider>

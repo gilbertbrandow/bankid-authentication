@@ -1,20 +1,35 @@
 import BankIDLogo from "../../components/icons/BankIDLogo";
 import { Button } from "../../components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { LockOpen } from "lucide-react";
 import { useTheme } from "../../components/theme-provider";
 import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
-
+  const location = useLocation();
   const { t } = useTranslation();
   const { theme } = useTheme();
+
+  useEffect(() => {
+    if (location.state?.error) {
+      toast.error("Error", {
+        description: location.state.error,
+      });
+      navigate(location.pathname, { replace: true, state: {} });
+    } else if (location.state?.message) {
+      toast.info(t("Message"), {
+        description: location.state.message,
+      });
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const isDarkMode = theme === "dark";
   const buttonBgColor = isDarkMode ? "bg-primary" : "bg-[#193E4F]";
   const logoColor = isDarkMode ? "#193E4F" : "#ffffff";
-
 
   return (
     <div className="mx-auto grid w-[400px] gap-4">
