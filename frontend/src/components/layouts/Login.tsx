@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Outlet } from "react-router-dom";
@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { LanguageSwitcher } from "../ui/language-switcher";
 import { useTranslation } from "react-i18next";
+import { checkTokenValidity } from "../../lib/api";
 
 interface LoginLayoutProps {
   children?: ReactNode;
@@ -17,6 +18,17 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const verifyToken = async () => {
+      const isValid = await checkTokenValidity();
+      if (isValid) {
+        navigate("/permissions");
+      }
+    };
+
+    verifyToken();
+  }, [navigate]);
 
   return (
     <div className="flex h-screen">
