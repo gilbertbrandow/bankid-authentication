@@ -24,15 +24,15 @@ const SignUpDrawer = () => {
           </Button>
         </DrawerTrigger>
         <DrawerContent>
-          <div className="mx-auto w-full max-w-sm">
+          <div className="mx-auto w-full max-w-lg">
             <DrawerHeader>
               <DrawerTitle>
-                <h1 className="text-3xl my-4 font-bold text-center">
-                  {t("So you would like to no more.")}
+                <h1 className="text-3xl my-4 font-bold  text-center">
+                  {t("So you would like to know more.")}
                 </h1>
               </DrawerTitle>
-              <DrawerDescription className="flex justify-center">
-                <div className="max-w-[500px] text-center">
+              <DrawerDescription>
+                <div className="text-center">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
                   do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                   Ut enim ad minim veniam.
@@ -40,7 +40,10 @@ const SignUpDrawer = () => {
               </DrawerDescription>
             </DrawerHeader>
             <DrawerFooter>
-              <Button><Send size={16} className="mr-2"/>{t("Contact us")}</Button>
+              <Button>
+                <Send size={16} className="mr-2" />
+                {t("Contact us")}
+              </Button>
               <DrawerClose asChild>
                 <Button variant="outline">{t("Cancel")}</Button>
               </DrawerClose>
