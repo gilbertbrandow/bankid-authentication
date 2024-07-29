@@ -16,9 +16,7 @@ const BankIDLogin = () => {
   const { t } = useTranslation();
   const apiRequest = useApiRequest();
   const { setAuthTokens } = useAuth();
-  const [qrCode, setQrCode] = useState(
-    "/qr-code-placeholder.png"
-  );
+  const [qrCode, setQrCode] = useState("/qr-code-placeholder.png");
 
   const [message, setMessage] = useState(
     t(
@@ -112,22 +110,23 @@ const BankIDLogin = () => {
           style={{ filter: theme === "dark" ? "invert(1)" : "" }}
         />
         {(error || loading) && (
-            <div className="absolute rounded-sm w-[100%] h-[100%] inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 backdrop-blur-sm">
-              {error && (
-                <>
-                  <AlertCircle size={32} />
-                  <Button
-                    variant="link"
-                    onClick={initiateBankID}
-                    className="mt-2 text-sm underline"
-                  >
-                    {t("Try Again.")}
-                  </Button>
-                </>
-              )}
-              {loading && <Spinner size={2} />}
-            </div>
-          )}
+          <div className="absolute rounded-sm w-[100%] h-[100%] inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 backdrop-blur-sm">
+            {error ? (
+              <>
+                <AlertCircle size={32} />
+                <Button
+                  variant="link"
+                  onClick={initiateBankID}
+                  className="mt-2 text-sm underline"
+                >
+                  {t("Try Again.")}
+                </Button>
+              </>
+            ) : (
+              loading && <Spinner size={2} />
+            )}
+          </div>
+        )}
       </div>
       {error ? (
         <div className="max-w-[300px] mb-4">
