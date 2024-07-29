@@ -85,13 +85,13 @@ def poll_authentication_status(request: Request, order_ref: str) -> Response:
         auth = bankid_service.poll_authentication_status(order_ref)
         return Response(auth, status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except requests.RequestException as e:
         error_message = f"Failed to poll BankID authentication status: {str(e)}"
-        return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': error_message}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         error_message = f"An unexpected error occurred: {str(e)}"
-        return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'detail': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @csrf_exempt
@@ -104,10 +104,10 @@ def cancel_authentication(request: Request, order_ref: str) -> Response:
         return Response({'success': 'BankID authentication cancelled.'}, status=status.HTTP_204_NO_CONTENT)
     except requests.RequestException as e:
         error_message = f"Failed to poll BankID authentication status: {str(e)}"
-        return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': error_message}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         error_message = f"An unexpected error occurred: {str(e)}"
-        return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'detail': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
