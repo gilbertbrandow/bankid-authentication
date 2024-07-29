@@ -4,7 +4,7 @@
   "Sign in to": "Logga in på",
   "Login with mobile BankID": "Logga in med mobilt BankID",
   "Login with BankID on this device": "Logga in med BankID på samma enhet",
-  "Login with Email & Password": "Logga in med Epost & lösenord",
+  "Login with Email & Password": "Logga in med e-post & lösenord",
   "Back": "Tillbaka",
   "Copyright": "Alla rättigheter reserverade",
   "Login": "Logga in",
@@ -18,5 +18,10 @@
   "Video by": "Video av",
   "Send link to reset password": "Skicka länk för återställning av lösenord",
   "Launch the BankID-app on your phone and press scan QR-code. Point the camera to the QR-code above this message.": "Starta BankID-appen i din mobil och tryck på Skanna QR-kod. Rikta kameran mot QR-koden här ovanför.",
-  "Try Again": "Försök igen"
+  "Try Again": "Försök igen",
+  "Don't have an account?": "Har du inget konto?", 
+  "Read about signing up" : "Läs mer om att gå med.", 
+  "So you would like to no more." : "Så, du vill veta mer.", 
+  "Cancel": "Avbryt", 
+  "Contact us": "Kontakta oss"
 }
