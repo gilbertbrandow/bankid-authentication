@@ -5,7 +5,7 @@ interface SpinnerProps {
   size?: number;
 }
 
-const Spinner: React.FC<SpinnerProps> = ({ color = '#000', size = 2 }) => {
+const Spinner: React.FC<SpinnerProps> = ({size = 2 }) => {
   const spinnerSize = `${size}rem`;
   const spinnerBorderSize = `${size / 10}rem`;
 

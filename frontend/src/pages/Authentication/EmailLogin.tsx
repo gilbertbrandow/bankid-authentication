@@ -49,7 +49,7 @@ const EmailLogin = () => {
       });
 
       setAuthTokens(data.access_token, data.refresh_token);
-      navigate("/dashboard");
+      navigate("/permissions");
     } catch (error: any) {
       setErrorMessage(error.message);
       setLoading(false);
