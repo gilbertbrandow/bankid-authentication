@@ -83,7 +83,7 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
         <div className="absolute bottom-8 left-8 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg text-white pl-2 pr-4 py-2 rounded-lg flex items-center gap-2">
           <Avatar className="h-8 w-8">
             <AvatarImage
-              src="https://images.pexels.com/users/avatars/649765/yaroslav-shuraev-169.jpeg?auto=compress&fit=crop&h=130&w=130&dpr=2"
+              src="/yaroslav-shuraev.jpeg"
               alt="Yaroslav Shuraev"
             />
             <AvatarFallback>YS</AvatarFallback>
