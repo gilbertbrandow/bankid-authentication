@@ -12,6 +12,7 @@ import { I18nextProvider } from "react-i18next";
 import i18n from "./i18n";
 import { Suspense } from "react";
 import { Toaster } from "./components/ui/sonner";
+import LoginSupport from "./pages/Authentication/LoginSupport";
 
 const Loading = () => <div>Loading...</div>;
 
@@ -26,6 +27,7 @@ const App = () => {
                 <Routes>
                   <Route element={<LoginLayout />}>
                     <Route path="login" element={<Login />} />
+                    <Route path="login-support" element={<LoginSupport />} />
                     <Route path="email-login" element={<EmailLogin />} />
                     <Route path="bankid-login" element={<BankIDLogin />} />
                     <Route
