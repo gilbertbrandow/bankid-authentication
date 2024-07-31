@@ -103,14 +103,14 @@ const BankIDLogin = () => {
       <h1 className="text-3xl font-bold mb-2 text-center inline-flex items-center">
         {t("Scan")} (<BankIDLogo size={3.5} color="#000" />) {t("QR Code")}
       </h1>
-      <div className="relative w-[340px]">
+      <div className="relative w-[300px]">
         <img
           src={qrCode}
           alt="BankID QR Code"
           style={{ filter: theme === "dark" ? "invert(1)" : "" }}
         />
         {(error || loading) && (
-          <div className="absolute rounded-sm w-[100%] h-[100%] inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 backdrop-blur-sm">
+          <div className="absolute w-[100%] h-[100%] inset-0 flex flex-col items-center justify-center bg-opacity-80 backdrop-blur-sm" style={{ backgroundColor: 'var(--background)' }}>
             {error ? (
               <>
                 <AlertCircle size={32} />
@@ -129,7 +129,7 @@ const BankIDLogin = () => {
         )}
       </div>
       {error ? (
-        <div className="max-w-[300px] mb-4">
+        <div className="max-w-[300px] mt-4 mb-2">
           <AlertDestructive title="Error" description={error} />
         </div>
       ) : (
