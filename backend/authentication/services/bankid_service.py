@@ -136,9 +136,20 @@ class BankIDService():
             raise
 
     def generate_qr_code_image(self, qr_data: str) -> bytes:
-        qr_img = qrcode.make(qr_data)
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=0,
+        )
+        
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="transparent").convert("RGBA")
+        
         with io.BytesIO() as buffer:
-            qr_img.save(buffer)
+            img.save(buffer, format="PNG")
             return buffer.getvalue()
 
     def poll_authentication_status(self, order_ref: str) -> Dict[str, Union[str, object]]:
