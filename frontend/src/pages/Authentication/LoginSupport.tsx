@@ -35,7 +35,7 @@ const LoginSupport = () => {
       <Accordion type="single" collapsible className="w-full">
         {questions.map((entry, index) => {
           return (
-            <AccordionItem value={"item-" + index}>
+            <AccordionItem key={index} value={"item-" + index}>
               <AccordionTrigger>{entry.question}</AccordionTrigger>
               <AccordionContent>{entry.answers}</AccordionContent>
             </AccordionItem>

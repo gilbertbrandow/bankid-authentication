@@ -26,17 +26,13 @@ const SignUpDrawer = () => {
         <DrawerContent>
           <div className="mx-auto w-full max-w-lg">
             <DrawerHeader>
-              <DrawerTitle>
-                <h1 className="text-3xl my-4 font-bold  text-center">
-                  {t("So you would like to know more.")}
-                </h1>
+              <DrawerTitle className="text-center">
+                {t("So you would like to know more.")}
               </DrawerTitle>
-              <DrawerDescription>
-                <div className="text-center">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Ut enim ad minim veniam.
-                </div>
+              <DrawerDescription className="text-center">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                enim ad minim veniam.
               </DrawerDescription>
             </DrawerHeader>
             <DrawerFooter>
