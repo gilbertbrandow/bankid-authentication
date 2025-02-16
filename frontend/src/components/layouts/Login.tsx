@@ -43,7 +43,7 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
             <Logo color="--primary" size={32} />
           </Button>
           <div className="flex items-right gap-2">
-            {location.pathname !== "/lo gin" && (
+            {location.pathname !== "/login" && (
               <Button
                 variant="ghost"
                 className="pl-2 pr-2 flex items-center gap-1"

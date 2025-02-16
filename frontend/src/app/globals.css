@@ -108,5 +108,5 @@
   height: 100%;
   background-color: hsl(var(--status-green));
   border-radius: 50%;
-  animation: pulse-wave 1.2s infinite ease-out;
+  animation: pulse-wave 2s infinite ease-out;
 }

@@ -31,9 +31,7 @@ def refresh_token(request: Request) -> Response:
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def email_password_login(request: Request) -> Response:
-    email = request.data.get('email')
-    password = request.data.get('password')
-    user = User.objects.authenticate(email=email, password=password)
+    user = User.objects.authenticate(email=request.data.get('email'), password=request.data.get('password'))
 
     if user is None:
         return Response({'detail': _('Invalid credentials')}, status=status.HTTP_400_BAD_REQUEST)
@@ -48,9 +46,9 @@ def email_password_login(request: Request) -> Response:
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def bankid_initiate_authentication(request: Request) -> Response:
-    bankid_service = BankIDService()
+    bankid_service: BankIDService = BankIDService()
     try:
-        order_ref = bankid_service.initiate_authentication(
+        order_ref: str = bankid_service.initiate_authentication(
             end_user_ip=request.META.get('REMOTE_ADDR'))
         return Response({'orderRef': order_ref}, status=status.HTTP_200_OK)
     except requests.RequestException as e:
