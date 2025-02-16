@@ -24,7 +24,7 @@ const SignUpDrawer = () => {
           </Button>
         </DrawerTrigger>
         <DrawerContent>
-          <div className="mx-auto w-full max-w-lg">
+          <div className="mx-auto w-full max-w-lg mt-4">
             <DrawerHeader>
               <DrawerTitle className="text-center">
                 {t("So you would like to know more.")}

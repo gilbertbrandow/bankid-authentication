@@ -9,6 +9,7 @@ import { ThemeToggle } from "../ui/theme-toggle";
 import { LanguageSwitcher } from "../ui/language-switcher";
 import { useTranslation } from "react-i18next";
 import { checkTokenValidity } from "../../lib/api";
+import { Badge } from "../ui/Badge";
 
 interface LoginLayoutProps {
   children?: ReactNode;
@@ -71,10 +72,10 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
               <LifeBuoy size={18} className="mr-1" />
               {t("Support")}
             </Button>
-            <span>
-              {" "}
-              {t("Copyright")} © {new Date().getFullYear()}{" "}
-            </span>
+            <Badge variant={"success"}>
+              <div className="w-2.5 h-2.5 mr-2 rounded-full running-indicator"></div>
+              {t("All systems operational")}
+            </Badge>
           </div>
         </footer>
       </div>
