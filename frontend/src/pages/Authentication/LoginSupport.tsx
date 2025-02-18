@@ -1,13 +1,17 @@
+import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "../../components/ui/accordion";
+import { Button } from "../../components/ui/button";
 
 const LoginSupport = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const questions = [
     {
@@ -42,6 +46,14 @@ const LoginSupport = () => {
           );
         })}
       </Accordion>
+      <Button
+        variant="link"
+        className="mt-2 text-xs flex justify-center items-center text-muted-foreground text-center"
+        onClick={() => navigate("/login")}
+      >
+        <ArrowLeft className="h-3 w-3 mr-1" />
+        {t("To sign in")}
+      </Button>
     </div>
   );
 };

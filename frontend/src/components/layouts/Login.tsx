@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Outlet } from "react-router-dom";
-import { ArrowLeft, LifeBuoy } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Logo from "../icons/Logo";
 import { Button } from "../ui/button";
 import { ThemeToggle } from "../ui/theme-toggle";
@@ -64,16 +64,19 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
             style={{ borderColor: "hsl(var(--border))" }}
           />
           <div className="flex justify-between items-center">
+          <span>
+              {" "}
+              {t("Copyright")} © {new Date().getFullYear()}{" | "}
             <Button
               variant="link"
               className="font-normal text-muted-foreground text-sm p-0 mt-0"
               onClick={() => navigate("login-support")}
             >
-              <LifeBuoy size={18} className="mr-1" />
               {t("Support")}
             </Button>
-            <Badge variant={"success"}>
-              <div className="w-2.5 h-2.5 mr-2 rounded-full running-indicator"></div>
+            </span>
+            <Badge variant={"secondary"}>
+              <div className="w-2 h-2 mr-1.5 rounded-full running-indicator"></div>
               {t("All systems operational")}
             </Badge>
           </div>
