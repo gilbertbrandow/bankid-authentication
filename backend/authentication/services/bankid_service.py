@@ -14,6 +14,7 @@ from authentication.models import BankIDAuthentication
 from typing import Dict, Union
 from django.core.exceptions import ObjectDoesNotExist
 from authentication.models import BankIDAuthentication
+import requests_pkcs12
 
 
 class BankIDService():
@@ -59,15 +60,16 @@ class BankIDService():
 
     def __init__(self) -> None:
         self.bankid_url = settings.BANKID['endpoint']
-        self.cert = (settings.BANKID['cert_path'],
-                     settings.BANKID['cert_key_path'])
+        self.pkcs12_file = settings.BANKID['p12_cert_path']
+        self.pkcs12_password = settings.BANKID['p12_password']
         self.verify = settings.BANKID['ca_cert_path']
 
     def _request(self, path: str, payload: Dict[str, Union[str, bool, object]]) -> Response:
-        return requests.post(
+        return requests_pkcs12.post(
             f'{self.bankid_url}{path}',
             json=payload,
-            cert=self.cert,
+            pkcs12_filename=self.pkcs12_file,
+            pkcs12_password=self.pkcs12_password,
             verify=self.verify
         )
 
