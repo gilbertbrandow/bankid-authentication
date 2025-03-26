@@ -141,10 +141,10 @@ CACHES: Dict[str, dict[str, str]] = {
 }
 
 BANKID: Dict[str, str | None] = {
-    "endpoint": get_secret('BANKID_ENDPOINT'),
-    "ca_cert_path": get_secret('BANKID_CA_CERT'),
-    "cert_path": get_secret('BANKID_CERT_PEM_PATH'),
-    "cert_key_path": get_secret('BANKID_CERT_PEM_KEY_PATH'),
+    'endpoint': get_secret('BANKID_ENDPOINT'),
+    'p12_cert_path': get_secret('BANKID_CERT_P12_PATH'),
+    'p12_password': get_secret('BANKID_PKCS12_PASSWORD'),
+    'ca_cert_path': get_secret('BANKID_CA_CERT'),
 }
 
 LOGGING: Dict[str, Any] = {
