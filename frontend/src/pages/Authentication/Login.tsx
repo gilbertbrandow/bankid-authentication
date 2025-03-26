@@ -2,7 +2,7 @@ import BankIDLogo from "../../components/icons/BankIDLogo";
 import { Button } from "../../components/ui/button";
 import SignUpDrawer from "../../components/SignUpDrawer";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LockOpen } from "lucide-react";
+import { User } from "lucide-react";
 import { useTheme } from "../../components/theme-provider";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
@@ -58,7 +58,7 @@ const Login = () => {
         className="w-full"
         onClick={() => navigate("/email-login")}
       >
-        <LockOpen className="h-4 w-4 mr-4" />
+        <User className="h-5 w-5 mr-4" />
         {t("Login with Email & Password")}
       </Button>
       <span className="mt-2 text-xs flex justify-center items-center text-muted-foreground text-center">
