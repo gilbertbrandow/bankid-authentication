@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useApiRequest } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 import { AlertDestructive } from "../../components/ui/AlertDestructive";
-import { AlertCircle } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import Spinner from "../../components/icons/Spinner";
 
 const BankIDLogin = () => {
@@ -27,9 +27,19 @@ const BankIDLogin = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearPollingInterval = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
   const initiateBankID = async () => {
     setError("");
     setLoading(true);
+    clearPollingInterval();
 
     try {
       const response = await apiRequest("authentication/bankid/initiate/", {
@@ -40,13 +50,13 @@ const BankIDLogin = () => {
 
       setLoading(false);
 
-      let intervalId = setInterval(async () => {
+      intervalRef.current = setInterval(async () => {
         try {
           await pollAuthentication(response.orderRef);
           await fetchQrCode(response.orderRef);
         } catch (error: any) {
           setError(error.message);
-          clearInterval(intervalId);
+          clearPollingInterval();
         }
       }, 1000);
     } catch (error: any) {
@@ -55,11 +65,9 @@ const BankIDLogin = () => {
   };
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
     initiateBankID();
 
-    return () => clearInterval(intervalId);
+    return () => clearPollingInterval();    ;
   }, []);
 
   const fetchQrCode = async (orderRef: string) => {
@@ -103,23 +111,22 @@ const BankIDLogin = () => {
       <h1 className="text-3xl font-bold mb-2 text-center inline-flex items-center">
         {t("Scan")} (<BankIDLogo size={3.5} color="#000" />) {t("QR Code")}
       </h1>
-      <div className="relative w-[300px]">
+      <div className="relative w-[300px] p-5">
         <img
           src={qrCode}
           alt="BankID QR Code"
           style={{ filter: theme === "dark" ? "invert(1)" : "" }}
         />
         {(error || loading) && (
-          <div className="absolute w-[100%] h-[100%] inset-0 flex flex-col items-center justify-center bg-opacity-80 backdrop-blur-sm" style={{ backgroundColor: 'var(--background)' }}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm">
             {error ? (
               <>
-                <AlertCircle size={32} />
                 <Button
-                  variant="link"
+                  variant="default"
                   onClick={initiateBankID}
-                  className="mt-2 text-sm underline"
                 >
-                  {t("Try Again.")}
+                  <RotateCcw size="15" className="mr-2"/>
+                  {t("Try Again")}
                 </Button>
               </>
             ) : (
@@ -130,7 +137,7 @@ const BankIDLogin = () => {
       </div>
       {error ? (
         <div className="max-w-[300px] mt-4 mb-2">
-          <AlertDestructive title="Error" description={error} />
+          <AlertDestructive title={t("Something went wrong")} description={error} />
         </div>
       ) : (
         <p className="mb-8 mt-4 text-sm text-muted-foreground text-center max-w-[280px]">
