@@ -41,8 +41,7 @@ def check_permission(permission_codename: str) -> Callable:
     def decorator(view_func: Callable) -> Callable:
         @wraps(view_func)
         def _wrapped_view(view: CustomAPIView, request: Request, *args: Any, **kwargs: Any) -> Any:
-            permission_checker = HasPermissionOrIsSuperuser(
-                permission_codename=permission_codename)
+            permission_checker: HasPermissionOrIsSuperuser = HasPermissionOrIsSuperuser(permission_codename=permission_codename)
             permission_checker.has_permission(request, view)
             return view_func(view, request, *args, **kwargs)
         return _wrapped_view

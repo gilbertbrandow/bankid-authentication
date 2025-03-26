@@ -52,7 +52,10 @@ def bankid_initiate_authentication(request: Request) -> Response:
             end_user_ip=request.META.get('REMOTE_ADDR'))
         return Response({'orderRef': order_ref}, status=status.HTTP_200_OK)
     except requests.RequestException as e:
-        return Response({'detail':  f"Failed to initiate BankID authentication: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'error': str(e),
+            'detail': "Failed to initiate BankID authentication"
+        }, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'detail': f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -112,10 +115,10 @@ def cancel_authentication(request: Request, order_ref: str) -> Response:
 @permission_classes([AllowAny])
 def set_language(request: Request) -> Response:
     lang_code = request.data.get('language', settings.LANGUAGE_CODE)
-    
+
     if lang_code and lang_code not in dict(settings.LANGUAGES).keys():
         return Response({'detail': 'Invalid language code'}, status=400)
-    
+
     activate(lang_code)
     request.session[settings.LANGUAGE_COOKIE_NAME] = lang_code
     request.session.save()
@@ -126,7 +129,7 @@ def set_language(request: Request) -> Response:
 @permission_classes([IsAuthenticated])
 def logout(request: Request) -> Response:
     user = request.user
-    
+
     JWTAuthentication.revoke_all_refresh_tokens(user)
     request.session.flush()
 
