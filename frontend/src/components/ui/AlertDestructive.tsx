@@ -12,8 +12,8 @@ export function AlertDestructive({
 }: AlertDestructiveProps) {
   return (
     <Alert variant="destructive">
-      <div className="flex align-center gap-2">
-        <TriangleAlert className="h-4 w-4 mb-1" />
+      <div className="flex align-center gap-1">
+        <TriangleAlert className="h-4 w-4 mb-1" style={{marginTop: "-0.05rem"}} />
         <AlertTitle>{title}</AlertTitle>
       </div>
       <AlertDescription>{description}</AlertDescription>

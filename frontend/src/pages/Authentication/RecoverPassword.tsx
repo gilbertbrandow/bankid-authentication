@@ -13,7 +13,7 @@ const RecoverPassword = () => {
           <Label htmlFor="email">{t("Email")}</Label>
           <Input id="email" type="email" placeholder="m@example.com" required />
         </div>
-        <Button type="submit" variant="outline" className="w-full">
+        <Button type="submit" variant="default" className="w-full">
           {t("Send link to reset password")}
         </Button>
       </div>
