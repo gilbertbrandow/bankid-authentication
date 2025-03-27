@@ -9,7 +9,7 @@ import { ThemeToggle } from "../ui/theme-toggle";
 import { LanguageSwitcher } from "../ui/language-switcher";
 import { useTranslation } from "react-i18next";
 import { checkTokenValidity } from "../../lib/api";
-import { Badge } from "../ui/Badge";
+import SystemStatusBadge from "../ui/SystemStatusBadge";
 
 interface LoginLayoutProps {
   children?: ReactNode;
@@ -75,10 +75,7 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
               {t("Support")}
             </Button>
             </span>
-            <Badge variant={"secondary"}>
-              <div className="w-2 h-2 mr-1.5 rounded-full running-indicator"></div>
-              {t("All systems operational")}
-            </Badge>
+            <SystemStatusBadge colorName="--status-green" message="All systems operational"/>
           </div>
         </footer>
       </div>
