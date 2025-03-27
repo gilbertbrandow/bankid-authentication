@@ -118,7 +118,7 @@ const BankIDLogin = () => {
           style={{ filter: theme === "dark" ? "invert(1)" : "" }}
         />
         {(error || loading) && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm">
+          <div className="absolute inset-0 flex flex-col items-center justify-center light:bg-white/50 dark:bg-dark/50 backdrop-blur-sm">
             {error ? (
               <>
                 <Button
